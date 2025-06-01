@@ -19,3 +19,12 @@ rm -f build/*
 rm -rf dist/*
 rm -rf sufast.egg-info/*
 ```
+
+# 🛠️ Building the Package
+```bash
+python setup.py sdist bdist_wheel
+```
+# 📝 Uploading to PyPI
+```bash
+python -m twine upload dist/*
+```
