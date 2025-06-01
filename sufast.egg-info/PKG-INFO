@@ -1,3 +1,22 @@
+Metadata-Version: 2.1
+Name: sufast
+Version: 0.1.2.3
+Summary: A blazing-fast Python web framework powered by Rust 🚀
+Home-page: https://github.com/shohan-dev/sufast
+Author: Shohan
+Author-email: shohan.dev.cse@gmail.com
+License: MIT
+Project-URL: Bug Tracker, https://github.com/shohan-dev/sufast/issues
+Project-URL: Documentation, https://github.com/shohan-dev/sufast
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Framework :: FastAPI
+Classifier: Development Status :: 3 - Alpha
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
 # 🚀 sufast – A Blazing Fast Python Web Framework Powered by Rust 
 
 **sufast** is a hybrid Python web framework that combines the **developer simplicity of Python** with the **performance of Rust**. Inspired by FastAPI, `sufast` delivers high-speed route handling and low-latency response times using a Rust backend while allowing full flexibility via Python.

@@ -1,0 +1,12 @@
+LICENSE
+MANIFEST.in
+README.md
+pyproject.toml
+setup.py
+sufast/__init__.py
+sufast/core.py
+sufast/sufast_server.dll
+sufast.egg-info/PKG-INFO
+sufast.egg-info/SOURCES.txt
+sufast.egg-info/dependency_links.txt
+sufast.egg-info/top_level.txt
