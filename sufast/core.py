@@ -28,8 +28,9 @@ class App:
             return lib
         except OSError as e:
             raise ImportError(
-                f"❌ Failed to load sufast_server.dll at {self.dll_path}: {str(e)}\n"
-                "💡 Check: 1) DLL exists  2) Architecture match (32/64-bit)  3) Dependencies are installed"
+                # f"❌ Failed to load sufast_server.dll at {self.dll_path}: {str(e)}\n"
+                "💡 Note: This library is currently only supported on Windows operating systems.\n"
+                "   Please check: 1) file exists  2) Architecture compatibility (32/64-bit)  3) Required dependencies are installed"
             ) from e
 
     def _register(self, method, path, handler):

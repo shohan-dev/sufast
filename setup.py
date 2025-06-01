@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as f:
 
 setup(
     name="sufast",
-    version="0.2",  # Bump the version!
+    version="0.2.1",  # Bump the version!
     author="Shohan",
     author_email="shohan.dev.cse@gmail.com",
     description="A blazing-fast Python web framework powered by Rust 🚀",
@@ -25,7 +25,9 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         # "Framework :: sufast", # still not supported
+        "Operating System :: Microsoft :: Windows",  # sufast_server.dll is currently only supported on Windows
         "Intended Audience :: Developers",
+
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Topic :: Internet :: WWW/HTTP",
         "Development Status :: 3 - Alpha",

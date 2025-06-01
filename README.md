@@ -1,13 +1,13 @@
-# 🚀 sufast – A Blazing Fast Python Web Framework Powered by Rust
+# 🚀 Sufast – A Blazing Fast Python Web Framework Powered by Rust
 
-**sufast** is a hybrid web framework that combines the developer-friendly simplicity of **Python 🐍** with the raw execution speed of **Rust 🦀**.
+**Sufast** is a hybrid web framework that combines the developer-friendly simplicity of **Python 🐍** with the raw execution speed of **Rust 🦀**.
 
-Built for high-performance APIs, scalable microservices, and modern AI-era backends, sufast delivers the best of both worlds:
+Built for high-performance APIs, scalable microservices, and modern AI-era backends, Sufast delivers the best of both worlds:
 
 
 ---
 
-# ⚡ Why sufast?
+# ⚡ Why Sufast?
 
 - 🚀 **52,000+ RPS** performance with Rust core
 - 🐍 FastAPI-style decorator syntax (`@app.get`, `@app.post`)
@@ -16,20 +16,20 @@ Built for high-performance APIs, scalable microservices, and modern AI-era backe
 ---
 
 ```bash
-pip install sufast
+pip install Sufast
 ```
 ⚠️ Requires Python 3.8+ and a platform-compatible Rust binary bundled in the package.
 
 # 🚀 Quickstart
 
 ```bash
-from sufast import App
+from Sufast import App
 
 app = App()
 
 @app.get("/")
 def hello():
-    return {"message": "Hello from sufast 👋"}
+    return {"message": "Hello from Sufast 👋"}
 
 app.run()
 ```
@@ -38,7 +38,7 @@ Visit -> [http://localhost:8080/ 🚀](http://localhost:8080/)
 
 # 📚 Advanced Example – API Server
 ```bash
-from sufast import App
+from Sufast import App
 
 app = App()
 
@@ -51,7 +51,7 @@ users = {
 
 @app.get("/")
 def home():
-    return {"message": "Welcome to sufast API 🚀"}
+    return {"message": "Welcome to Sufast API 🚀"}
 
 @app.get("/shohan")
 def app_info():
@@ -73,10 +73,10 @@ app.run()
 
 ## 📊 Real-World Performance Benchmark
 
-| **Metric**               | 🦀 **Native Rust** (Actix-Web) | 🚀 **sufast** (Rust + Python) | 🐍 **FastAPI** (Uvicorn) | 🌐 **Node.js** (Express) |
+| **Metric**               | 🦀 **Native Rust** (Actix-Web) | 🚀 **Sufast** (Rust + Python) | 🐍 **FastAPI** (Uvicorn) | 🌐 **Node.js** (Express) |
 |--------------------------|--------------------------------|-------------------------------|---------------------------|----------------------------|
 | **Language**             | 🦀 Rust                        | 🦀 Rust + 🐍 Python             | 🐍 Python                | <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg" width="20"/> JavaScript |
-| **Avg. Requests/sec** 🚀 | 🔥 **58,000+**                 | 🔥 **52,000+**                 | 🐢 ~20,000+              | ⚡ ~30,000+                |
+| **Avg. Requests/sec** 🚀 | 🔥 **56,000+**                 | 🔥 **52,000+**                 | 🐢 ~25,000+              | ⚡ ~35,000+                |
 | **Avg. Latency (ms)** ⏱  | ~1.7                           | ~2.1                          | ~5.6                    | ~4.2                      |
 | **Memory Usage (MB)** 💾 | ~20                            | ~25                           | ~60                     | ~50                       |
 | **Startup Time (ms)** ⚡  | ~25                            | ~35                           | ~90                     | ~40                       |
@@ -115,7 +115,7 @@ k6 run test.js
 
 ✅ Rust-based core for high-speed routing
 
-✅ Python decorators like @app.get() / @app.post()
+✅ Python decorators like `@app.get()` , `@app.post()`
 
 ✅ FastAPI-style route syntax
 
@@ -127,7 +127,7 @@ k6 run test.js
 
 # 🔭 Roadmap
 
- 🧠 Static parameters (like /users)
+ 🧠 Static parameters (like `/users`)
 
  🌐 Static file serving
 
@@ -136,18 +136,31 @@ k6 run test.js
  📄 PyPI full release and documentation site
 
 # ⚠️ Development Status
-Notice: sufast is currently under active development.
+Notice: Sufast is currently under active development.
 While it is fully functional for experimentation and early prototyping, it is not yet recommended for production or commercial deployment.
 
 Contributions, bug reports, and feature suggestions are welcome! 🙌
 
 # 🤝 Contributing
 Found a bug or want to help?
-Open an issue or PR on GitHub!
+## How to Contribute
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Commit your changes: `git commit -m 'Add some amazing feature'`
+4. Push to the branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
+
+Have suggestions or found a bug? [Open an issue](https://github.com/shohan-dev/sufast/issues) or submit a PR!
+
+Join our growing community of contributors helping make Sufast even better!
 
 
-📃 License
-MIT License – do anything you want, just give credit 😄
-Copyright © Shohan
+# 📃 License
 
+This project is licensed under the terms of the MIT license.
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+[View the full license](https://opensource.org/licenses/MIT)
 

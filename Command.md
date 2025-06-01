@@ -11,3 +11,11 @@ Then run the following commands:
 python setup.py sdist bdist_wheel
 python -m twine upload dist/*
 ```
+
+# Claer the dist directory before building:
+
+```bash
+rm -f build/*
+rm -rf dist/*
+rm -rf sufast.egg-info/*
+```
