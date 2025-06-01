@@ -1,4 +1,4 @@
-# 🚀 sufast – A Blazing Fast Python Web Framework Powered by Rust ⚙️
+# 🚀 sufast – A Blazing Fast Python Web Framework Powered by Rust
 
 **sufast** is a hybrid web framework that combines the developer-friendly simplicity of **Python 🐍** with the raw execution speed of **Rust 🦀**.
 
@@ -71,17 +71,16 @@ def show_user():
 app.run()
 ```
 
-# 📊 Real-World Performance Benchmark
+## 📊 Real-World Performance Benchmark
 
-| **Metric**               | **Sufast (Rust + Python)** | **Native Rust (Actix-Web)** | **FastAPI (Uvicorn)** | **Node.js (Express)** |
-|--------------------------|----------------------------|------------------------------|------------------------|------------------------|
-| **Language**             | 🦀 Rust + 🐍 Python         | 🦀 Rust                      | 🐍 Python              | ☕ JavaScript           |
-| **Avg. Req/sec** 🚀      | ✅ **52,000+**              | 🔥 **58,000+**               | 🐍 20,000+             | 🚀 30,000+             |
-| **Avg. Latency (ms)** ⏱  | ~2.1                       | ~1.7                         | ~5.6                  | ~4.2                  |
-| **Memory Usage (MB)** 💾 | ~25                        | ~20                          | ~60                   | ~50                   |
-| **Startup Time (ms)** ⚡  | ~35                        | ~25                          | ~90                   | ~40                   |
-| **Developer UX** 🧑‍💻    | ✅ FastAPI-style syntax     | ⚠️ Manual routing            | ✅ Excellent           | ✅ Excellent           |
-
+| **Metric**               | 🦀 **Native Rust** (Actix-Web) | 🚀 **sufast** (Rust + Python) | 🐍 **FastAPI** (Uvicorn) | 🌐 **Node.js** (Express) |
+|--------------------------|--------------------------------|-------------------------------|---------------------------|----------------------------|
+| **Language**             | 🦀 Rust                        | 🦀 Rust + 🐍 Python             | 🐍 Python                | <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg" width="20"/> JavaScript |
+| **Avg. Requests/sec** 🚀 | 🔥 **58,000+**                 | 🔥 **52,000+**                 | 🐢 ~20,000+              | ⚡ ~30,000+                |
+| **Avg. Latency (ms)** ⏱  | ~1.7                           | ~2.1                          | ~5.6                    | ~4.2                      |
+| **Memory Usage (MB)** 💾 | ~20                            | ~25                           | ~60                     | ~50                       |
+| **Startup Time (ms)** ⚡  | ~25                            | ~35                           | ~90                     | ~40                       |
+| **Developer UX** 🧑‍💻     | ⚠️ Manual, low-level routing   | ✅ FastAPI-style, intuitive    | ✅ Very Dev-Friendly     | ✅ Dev-Friendly           |
 
 
 # 🔬 Load Testing with k6

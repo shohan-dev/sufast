@@ -70,7 +70,7 @@ class App:
             raise RuntimeError("❌ sufast_server failed to accept route configuration.")
 
         if not lib.start_server(production, port):
-            raise RuntimeError("❌ sufast_server failed to start.")
+            raise RuntimeError("❌ sufast_server failed to start.") 
 
         try:
             while True:
