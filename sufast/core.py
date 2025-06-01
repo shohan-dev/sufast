@@ -29,7 +29,7 @@ class App:
         except OSError as e:
             raise ImportError(
                 # f"❌ Failed to load sufast_server.dll at {self.dll_path}: {str(e)}\n"
-                "💡 Note: This library is currently only supported on Windows operating systems.\n"
+                "💡 Note: This Framework is currently only supported on Windows operating systems.\n"
                 "   Please check: 1) file exists  2) Architecture compatibility (32/64-bit)  3) Required dependencies are installed"
             ) from e
 
@@ -64,7 +64,8 @@ class App:
         print(f"🔀  Routes   : {sum(len(r) for r in self.routes.values())} registered")
         print(f"🚪 Port     : {port}")
         print("🟢 Status   : Server is up and running!")
-        print(f"➡️  Visit    : http://localhost:{port}")
+        if not production:
+            print(f"➡️  Visit    : http://localhost:{port}")
         print("🔄 Press Ctrl+C to stop the server.\n")
 
         if not lib.set_routes(buffer, len(json_routes)):
