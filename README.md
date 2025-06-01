@@ -137,6 +137,12 @@ k6 run test.js
 
  📄 PyPI full release and documentation site
 
+# ⚠️ Development Status
+Notice: sufast is currently under active development.
+While it is fully functional for experimentation and early prototyping, it is not yet recommended for production or commercial deployment.
+
+Contributions, bug reports, and feature suggestions are welcome! 🙌
+
 # 🤝 Contributing
 Found a bug or want to help?
 Open an issue or PR on GitHub!
