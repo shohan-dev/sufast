@@ -12,12 +12,12 @@ python setup.py sdist bdist_wheel
 python -m twine upload dist/*
 ```
 
-# Claer the dist directory before building:
+# Claer the dist & build directory before building:
 
 ```bash
-rm -f build/*
-rm -rf dist/*
-rm -rf sufast.egg-info/*
+Remove-Item -Recurse -Force .\build\
+Remove-Item -Recurse -Force .\dist\
+Remove-Item -Recurse -Force .\sufast.egg-info\
 ```
 
 # 🛠️ Building the Package
