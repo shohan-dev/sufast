@@ -83,7 +83,7 @@ app.run()
 | **Developer UX** 🧑‍💻     | ⚠️ Manual, low-level routing   | ✅ FastAPI-style, intuitive    | ✅ Very Dev-Friendly     | ✅ Dev-Friendly           |
 
 
-# 🔬 Load Testing with k6
+# 🔬 Load Testing with k6 
 ```bash
 // test.js
 import http from 'k6/http';
