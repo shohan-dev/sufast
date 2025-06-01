@@ -12,7 +12,6 @@ Built for high-performance APIs, scalable microservices, and modern AI-era backe
 - 🚀 **52,000+ RPS** performance with Rust core
 - 🐍 FastAPI-style decorator syntax (`@app.get`, `@app.post`)
 - 📦 Easy to use and install
-- 🧠 Ideal for AI, microservices, and real-time apps
 
 ---
 

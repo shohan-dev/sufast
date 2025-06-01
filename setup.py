@@ -23,9 +23,11 @@ setup(
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
-        # "Operating System :: OS Independent",
-        "Operating System :: windows",
-        "Framework :: Sufast",
+        "Operating System :: OS Independent",
+        # "Framework :: sufast", # still not supported
+        "Intended Audience :: Developers",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+        "Topic :: Internet :: WWW/HTTP",
         "Development Status :: 3 - Alpha",
     ],
     python_requires=">=3.8",

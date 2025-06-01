@@ -60,7 +60,7 @@ class App:
 
         print("\n🔧 Booting up ⚡ sufast web server engine...\n")
         print(f"🌐 Mode     : {'🔒 Production' if production else '🧪 Development'}")
-        print(f"🛣️  Routes   : {sum(len(r) for r in self.routes.values())} registered")
+        print(f"🔀  Routes   : {sum(len(r) for r in self.routes.values())} registered")
         print(f"🚪 Port     : {port}")
         print("🟢 Status   : Server is up and running!")
         print(f"➡️  Visit    : http://localhost:{port}")

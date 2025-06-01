@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: sufast
-Version: 0.1.2.3
+Version: 0.1.2.4
 Summary: A blazing-fast Python web framework powered by Rust 🚀
 Home-page: https://github.com/shohan-dev/sufast
 Author: Shohan
@@ -11,24 +11,30 @@ Project-URL: Documentation, https://github.com/shohan-dev/sufast
 Classifier: Programming Language :: Python :: 3
 Classifier: License :: OSI Approved :: MIT License
 Classifier: Operating System :: OS Independent
-Classifier: Framework :: FastAPI
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: Internet :: WWW/HTTP
 Classifier: Development Status :: 3 - Alpha
 Requires-Python: >=3.8
 Description-Content-Type: text/markdown
 License-File: LICENSE
 
-# 🚀 sufast – A Blazing Fast Python Web Framework Powered by Rust 
+# 🚀 sufast – A Blazing Fast Python Web Framework Powered by Rust ⚙️
 
-**sufast** is a hybrid Python web framework that combines the **developer simplicity of Python** with the **performance of Rust**. Inspired by FastAPI, `sufast` delivers high-speed route handling and low-latency response times using a Rust backend while allowing full flexibility via Python.
+**sufast** is a hybrid web framework that combines the developer-friendly simplicity of **Python 🐍** with the raw execution speed of **Rust 🦀**.
 
-Perfect for:
-- High-performance microservices ⚡
-- Real-time APIs 🚦
-- Custom dynamic route handling 🔄
-- Python + Rust FFI enthusiasts 🧠
+Built for high-performance APIs, scalable microservices, and modern AI-era backends, sufast delivers the best of both worlds:
 
 
-## 📦 Installation
+---
+
+# ⚡ Why sufast?
+
+- 🚀 **52,000+ RPS** performance with Rust core
+- 🐍 FastAPI-style decorator syntax (`@app.get`, `@app.post`)
+- 📦 Easy to use and install
+
+---
 
 ```bash
 pip install sufast
@@ -48,7 +54,7 @@ def hello():
 
 app.run()
 ```
-Visit: http://localhost:8080/ 🚀
+Visit -> [http://localhost:8080/ 🚀](http://localhost:8080/)
 
 
 # 📚 Advanced Example – API Server
@@ -85,6 +91,19 @@ def show_user():
 
 app.run()
 ```
+
+# 📊 Real-World Performance Benchmark
+
+| **Metric**               | **Sufast (Rust + Python)** | **Native Rust (Actix-Web)** | **FastAPI (Uvicorn)** | **Node.js (Express)** |
+|--------------------------|----------------------------|------------------------------|------------------------|------------------------|
+| **Language**             | 🦀 Rust + 🐍 Python         | 🦀 Rust                      | 🐍 Python              | ☕ JavaScript           |
+| **Avg. Req/sec** 🚀      | ✅ **52,000+**              | 🔥 **58,000+**               | 🐍 20,000+             | 🚀 30,000+             |
+| **Avg. Latency (ms)** ⏱  | ~2.1                       | ~1.7                         | ~5.6                  | ~4.2                  |
+| **Memory Usage (MB)** 💾 | ~25                        | ~20                          | ~60                   | ~50                   |
+| **Startup Time (ms)** ⚡  | ~35                        | ~25                          | ~90                   | ~40                   |
+| **Developer UX** 🧑‍💻    | ✅ FastAPI-style syntax     | ⚠️ Manual routing            | ✅ Excellent           | ✅ Excellent           |
+
+
 
 # 🔬 Load Testing with k6
 ```bash
@@ -138,14 +157,19 @@ k6 run test.js
 
  📄 PyPI full release and documentation site
 
-🤝 Contributing
+# ⚠️ Development Status
+Notice: sufast is currently under active development.
+While it is fully functional for experimentation and early prototyping, it is not yet recommended for production or commercial deployment.
+
+Contributions, bug reports, and feature suggestions are welcome! 🙌
+
+# 🤝 Contributing
 Found a bug or want to help?
 Open an issue or PR on GitHub!
+
 
 📃 License
 MIT License – do anything you want, just give credit 😄
 Copyright © Shohan
-
-# sufast: Python ❤️ Rust – the future of high-performance web APIs.
 
 
