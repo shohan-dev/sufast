@@ -16,14 +16,14 @@ Built for high-performance APIs, scalable microservices, and modern AI-era backe
 ---
 
 ```bash
-pip install Sufast
+pip install sufast
 ```
 ⚠️ Requires Python 3.8+ and a platform-compatible Rust binary bundled in the package.
 
 # 🚀 Quickstart
 
 ```bash
-from Sufast import App
+from sufast import App
 
 app = App()
 
@@ -38,7 +38,7 @@ Visit -> [http://localhost:8080/ 🚀](http://localhost:8080/)
 
 # 📚 Advanced Example – API Server
 ```bash
-from Sufast import App
+from sufast import App
 
 app = App()
 

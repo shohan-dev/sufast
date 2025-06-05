@@ -1,1 +1,2 @@
 recursive-include sufast *.dll
+recursive-include sufast *.so
