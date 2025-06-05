@@ -12,7 +12,6 @@ class App:
         try:
             if sys.version_info >= (3, 9):
                 from importlib.resources import files
-                print("the libary name: ",self.library_name)
                 self.dll_path = str(files("sufast").joinpath(self.library_name))
             else:
                 import pkg_resources
@@ -23,7 +22,6 @@ class App:
     def _load_sufast_lib(self):
         try:
             full_path = os.path.abspath(self.dll_path)
-            print(f"🔍 Loading sufast library from: {full_path}")
             if platform.system() == "Linux":
                 if not os.path.isfile(full_path):
                     raise FileNotFoundError(f"Linux .so file not found at: {full_path}")
