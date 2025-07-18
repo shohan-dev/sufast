@@ -13,6 +13,7 @@ readme = "README.md"
 
 [lib]
 name = "sufast_server"
+path = "src/lib_ultimate.rs"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
