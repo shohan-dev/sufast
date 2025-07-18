@@ -63,10 +63,10 @@ class App:
         """Resolve the path to the shared library."""
         try:
             if pkg_resources:
-                dll_path = pkg_resources.resource_filename("sufast", self.library_name)
+                self.dll_path = pkg_resources.resource_filename("sufast", self.library_name)
             else:
-                dll_path = os.path.join(os.path.dirname(__file__), self.library_name)
-                if not os.path.exists(dll_path):
+                self.dll_path = os.path.join(os.path.dirname(__file__), self.library_name)
+                if not os.path.exists(self.dll_path):
                     # Try alternative locations
                     alt_paths = [
                         os.path.join(os.path.dirname(os.path.dirname(__file__)), self.library_name),
@@ -74,12 +74,12 @@ class App:
                     ]
                     for path in alt_paths:
                         if os.path.exists(path):
-                            dll_path = path
+                            self.dll_path = path
                             break
                     else:
                         raise FileNotFoundError(f"Library {self.library_name} not found in any expected location")
-            
-            return dll_path
+                
+                self.dll_path = pkg_resources.resource_filename("sufast", self.library_name)
         except Exception as e:
             raise RuntimeError(f"Could not resolve {self.library_name} location: {e}")
 
@@ -188,10 +188,8 @@ class App:
                 response_json = json.dumps(response_dict)
                 print(f"✅ Response sent")
                 
-                # Create persistent string buffer and return void pointer
-                result_bytes = response_json.encode('utf-8')
-                self._last_response_buffer = ctypes.create_string_buffer(result_bytes)
-                return ctypes.cast(self._last_response_buffer, ctypes.c_void_p).value
+                # Return C string
+                return ctypes.c_char_p(response_json.encode('utf-8'))
             else:
                 print(f"❌ Handler not found: {handler_name}")
                 error_response = {
@@ -199,10 +197,7 @@ class App:
                     'headers': {'Content-Type': 'application/json'},
                     'body': json.dumps({'error': f'Handler {handler_name} not found'})
                 }
-                error_json = json.dumps(error_response)
-                error_bytes = error_json.encode('utf-8')
-                self._last_response_buffer = ctypes.create_string_buffer(error_bytes)
-                return ctypes.cast(self._last_response_buffer, ctypes.c_void_p).value
+                return ctypes.c_char_p(json.dumps(error_response).encode('utf-8'))
                 
         except Exception as e:
             print(f"❌ Python handler error: {e}")
@@ -211,10 +206,7 @@ class App:
                 'headers': {'Content-Type': 'application/json'},
                 'body': json.dumps({'error': str(e)})
             }
-            error_json = json.dumps(error_response)
-            error_bytes = error_json.encode('utf-8')
-            self._last_response_buffer = ctypes.create_string_buffer(error_bytes)
-            return ctypes.cast(self._last_response_buffer, ctypes.c_void_p).value
+            return ctypes.c_char_p(json.dumps(error_response).encode('utf-8'))
 
     def get(self, path, middleware: List[Middleware] = None, name: str = None):
         """Register GET route with modern features."""
@@ -320,7 +312,7 @@ class App:
 
         # Register Python callback handler with correct signature  
         # The Rust side expects: extern "C" fn(*const c_char) -> *mut c_char
-        callback_type = ctypes.CFUNCTYPE(ctypes.c_void_p, ctypes.c_char_p)
+        callback_type = ctypes.CFUNCTYPE(ctypes.c_char_p, ctypes.c_char_p)
         callback_func = callback_type(self._python_request_handler)
         if not lib.set_python_handler(callback_func):
             raise RuntimeError("❌ Failed to register Python callback handler.")
