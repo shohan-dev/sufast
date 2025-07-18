@@ -1,0 +1,35 @@
+use crate::handlers::dynamic_handler;
+use axum::{routing::any, Router, Server};
+use std::{
+    net::{IpAddr, Ipv4Addr, SocketAddr},
+    thread,
+};
+use tokio::runtime::Runtime;
+
+/// Starts the Axum server in a new thread
+/// Returns true on success
+pub fn start_server(production: bool, port: u16) -> bool {
+    let port = if port == 1 { 8080 } else { port };
+
+    let ip = if production {
+        IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)) // public
+    } else {
+        IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)) // localhost
+    };
+
+    thread::spawn(move || {
+        let rt = Runtime::new().expect("Failed to create Tokio runtime");
+        rt.block_on(async move {
+            let app = Router::new().fallback(any(dynamic_handler));
+            let addr = SocketAddr::new(ip, port);
+
+            println!("🚀 Server running at http://{}", addr);
+
+            if let Err(err) = Server::bind(&addr).serve(app.into_make_service()).await {
+                eprintln!("❌ Server error: {}", err);
+            }
+        });
+    });
+
+    true
+}
