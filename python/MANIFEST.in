@@ -1,0 +1,7 @@
+include python/sufast/*.dll
+include python/sufast/*.so
+include python/sufast/*.dylib
+include README.md
+include LICENSE
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]

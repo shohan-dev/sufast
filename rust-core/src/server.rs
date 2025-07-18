@@ -1,10 +1,10 @@
 use crate::handlers::dynamic_handler;
-use axum::{routing::any, Router, Server};
+use axum::{routing::any, Router};
 use std::{
     net::{IpAddr, Ipv4Addr, SocketAddr},
     thread,
 };
-use tokio::runtime::Runtime;
+use tokio::{runtime::Runtime, net::TcpListener};
 
 /// Starts the Axum server in a new thread
 /// Returns true on success
@@ -25,7 +25,8 @@ pub fn start_server(production: bool, port: u16) -> bool {
 
             println!("🚀 Server running at http://{}", addr);
 
-            if let Err(err) = Server::bind(&addr).serve(app.into_make_service()).await {
+            let listener = TcpListener::bind(addr).await.expect("Failed to bind to address");
+            if let Err(err) = axum::serve(listener, app).await {
                 eprintln!("❌ Server error: {}", err);
             }
         });

@@ -2,22 +2,39 @@
 
 **Sufast** is a hybrid web framework that combines the developer-friendly simplicity of **Python 🐍** with the raw execution speed of **Rust 🦀**.
 
-Built for high-performance APIs, scalable microservices, and modern AI-era backends, Sufast delivers the best of both worlds:
+[![PyPI version](https://badge.fury.io/py/sufast.svg)](https://badge.fury.io/py/sufast)
+[![Python Support](https://img.shields.io/pypi/pyversions/sufast.svg)](https://pypi.org/project/sufast/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![CI/CD](https://github.com/shohan-dev/sufast/workflows/CI%2FCD%20Pipeline/badge.svg)](https://github.com/shohan-dev/sufast/actions)
+[![codecov](https://codecov.io/gh/shohan-dev/sufast/branch/main/graph/badge.svg)](https://codecov.io/gh/shohan-dev/sufast)
 
+Built for high-performance APIs, scalable microservices, and modern AI-era backends, Sufast delivers the best of both worlds.
 
----
-
-# ⚡ Why Sufast?
+## ⚡ Why Sufast?
 
 - 🚀 **52,000+ RPS** performance with Rust core
 - 🐍 FastAPI-style decorator syntax (`@app.get`, `@app.post`)
 - 📦 Easy to use and install
+- 🔧 Zero-configuration deployment
+- 🌐 Production-ready with comprehensive testing
 
----
+## 🏗️ Architecture
+
+```
+📁 Project Structure
+├── 🐍 python/          # Python package and bindings
+├── 🦀 rust-core/       # High-performance Rust engine
+├── 📚 docs/           # Comprehensive documentation
+├── 🧪 tests/          # Multi-language test suites
+└── 🔧 scripts/        # Development and build tools
+```
+
+## 📦 Installation
 
 ```bash
 pip install sufast
 ```
+
 ⚠️ Requires Python 3.8+ and a platform-compatible Rust binary bundled in the package.
 
 # 🚀 Quickstart

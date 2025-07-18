@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 
 # C extensions
+# Keep .so and .dll files for distribution
 # *.so
 
 # Distribution / packaging
@@ -124,3 +125,52 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Rust
+rust-core/target/
+rust-core/Cargo.lock
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Project specific
+# Keep the shared libraries in the package
+# python/sufast/*.dll
+# python/sufast/*.so
+# python/sufast/*.dylib
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+
+# Benchmark results
+rust-core/target/criterion/
+
+# Security
+.env.local
+.env.production
+*.key
+*.pem
+
+# Documentation builds
+docs/_build/
+site/
+
+# Legacy structure (remove after migration)
+server_rust/target/
+sufast/__pycache__/
+tests/__pycache__/

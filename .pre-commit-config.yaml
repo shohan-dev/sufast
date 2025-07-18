@@ -1,0 +1,74 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+      - id: check-json
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: debug-statements
+
+  - repo: https://github.com/psf/black
+    rev: 23.12.1
+    hooks:
+      - id: black
+        files: ^python/
+        language_version: python3
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        files: ^python/
+        args: ["--profile", "black"]
+
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.0.0
+    hooks:
+      - id: flake8
+        files: ^python/
+        args: ["--max-line-length=88", "--extend-ignore=E203,W503"]
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.8.0
+    hooks:
+      - id: mypy
+        files: ^python/sufast/
+        additional_dependencies: [types-requests]
+
+  - repo: https://github.com/doublify/pre-commit-rust
+    rev: v1.0
+    hooks:
+      - id: fmt
+        name: Rust format
+        files: ^rust-core/
+      - id: clippy
+        name: Rust clippy
+        files: ^rust-core/
+        args: ["--", "-D", "warnings"]
+
+  - repo: https://github.com/pycqa/bandit
+    rev: 1.7.5
+    hooks:
+      - id: bandit
+        files: ^python/sufast/
+        args: ["-c", "python/pyproject.toml"]
+
+  - repo: local
+    hooks:
+      - id: rust-test
+        name: Rust tests
+        entry: cargo test
+        language: system
+        files: ^rust-core/
+        pass_filenames: false
+
+      - id: python-test
+        name: Python tests
+        entry: python -m pytest tests/ -x
+        language: system
+        files: ^python/
+        pass_filenames: false

@@ -2,11 +2,11 @@
 
 use crate::routes::get_routes;
 use axum::{
-    body::{boxed, Body},
+    body::Body,
     http::{Request, StatusCode},
     response::{IntoResponse, Response},
 };
-use std::collections::HashMap; // <-- Import the helper that returns Option<&SharedRoutes>
+use std::collections::HashMap;
 
 /// Match a request path like `/user/Bob` against a pattern `/user/{name}`
 /// Returns a map of parameters if matched (e.g., `{ "name": "Bob" }`)
@@ -85,6 +85,6 @@ fn json_response(status_code: u16, body: String) -> Response {
     Response::builder()
         .status(status)
         .header("Content-Type", "application/json")
-        .body(boxed(Body::from(body)))
+        .body(Body::from(body))
         .unwrap()
 }
