@@ -1,5 +1,5 @@
 """
-Sufast Ultra-Optimized Python Core v2.0
+Sufast_server Ultra-Optimized Python Core v2.0
 Complete integration with Rust core for maximum performance
 
 Performance Targets:
@@ -263,7 +263,7 @@ class RustCore:
 # === ULTRA-OPTIMIZED APPLICATION CLASS ===
 class SufastUltraOptimized:
     """
-    Ultra-optimized Sufast application with three-tier performance:
+    Ultra-optimized Sufast_server application with three-tier performance:
     - Tier 1: Static routes (52,000+ RPS via Rust pre-compilation)
     - Tier 2: Cached routes (45,000+ RPS via intelligent caching)  
     - Tier 3: Dynamic routes (2,000+ RPS via optimized Python)
@@ -287,7 +287,7 @@ class SufastUltraOptimized:
         # Pre-compile critical routes for maximum performance
         self._precompile_critical_routes()
         
-        print("🚀 Sufast Ultra-Optimized v2.0 initialized")
+        print("🚀 Sufast_server Ultra-Optimized v2.0 initialized")
         print("⚡ Performance targets: 52K+ static, 45K+ cached, 2K+ dynamic RPS")
     
     def _register_python_handler(self):
@@ -449,7 +449,7 @@ class SufastUltraOptimized:
             # Pre-compile essential routes with optimized responses
             critical_routes = {
                 '/': {
-                    'message': 'Sufast Ultra-Optimized Server v2.0',
+                    'message': 'Sufast_server Ultra-Optimized Server v2.0',
                     'performance': 'Three-tier optimization active',
                     'targets': {
                         'static': '52,000+ RPS',
@@ -610,7 +610,7 @@ class SufastUltraOptimized:
         This will attempt to use the Rust core for maximum performance,
         falling back to Python implementation if Rust core is not available.
         """
-        print(f"🚀 Starting Sufast Ultra-Optimized Server v2.0")
+        print(f"🚀 Starting Sufast_server Ultra-Optimized Server v2.0")
         print(f"🌐 Server will start on {host}:{port}")
         print(f"⚡ Performance optimization: {'Ultra (Rust + Python)' if self.rust_core and self.rust_core.is_loaded else 'Standard (Python only)'}")
         
@@ -721,11 +721,11 @@ class Response:
             self.json = {"message": self.body}
 
 
-# Legacy Sufast class for backward compatibility
-class Sufast:
-    """Legacy Sufast class - use SufastUltraOptimized for best performance"""
+# Legacy Sufast_server class for backward compatibility
+class Sufast_server:
+    """Legacy Sufast_server class - use SufastUltraOptimized for best performance"""
     def __init__(self):
-        print("⚠️  Using legacy Sufast class. Consider upgrading to SufastUltraOptimized for 52K+ RPS")
+        print("⚠️  Using legacy Sufast_server class. Consider upgrading to SufastUltraOptimized for 52K+ RPS")
         self.ultra_app = SufastUltraOptimized()
     
     def route(self, path: str, methods: List[str] = ["GET"]):
@@ -749,7 +749,7 @@ class Sufast:
 
 # === CONVENIENCE FUNCTIONS ===
 def create_app(enable_rust_optimization: bool = True) -> SufastUltraOptimized:
-    """Create a new ultra-optimized Sufast application"""
+    """Create a new ultra-optimized Sufast_server application"""
     return SufastUltraOptimized(enable_rust_optimization)
 
 def quick_static_app(routes: Dict[str, dict]) -> SufastUltraOptimized:
@@ -802,7 +802,7 @@ def benchmark_app() -> SufastUltraOptimized:
 
 # === MAIN EXECUTION ===
 if __name__ == "__main__":
-    print("🚀 Sufast Ultra-Optimized v2.0 - Complete Implementation")
+    print("🚀 Sufast_server Ultra-Optimized v2.0 - Complete Implementation")
     print("⚡ Three-tier performance optimization ready")
     
     # Create benchmark app for testing

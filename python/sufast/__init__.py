@@ -7,18 +7,18 @@ Three-tier performance architecture:
 - Dynamic routes: 2K+ RPS (real-time processing)
 """
 
-from .core_ultimate import SufastUltimateOptimized, create_app
+from .core_ultimate import Sufast, create_app
 from .database import DatabaseConnection
 
 # Legacy support
 from .core import SufastUltraOptimized as SufastLegacy
 
 __version__ = "2.0.0"
-__all__ = ["SufastUltimateOptimized", "create_app", "DatabaseConnection", "SufastLegacy"]
+__all__ = ["Sufast", "create_app", "DatabaseConnection", "SufastLegacy"]
 
 from .core import (
     SufastUltraOptimized, 
-    Sufast, 
+    Sufast_server, 
     RustCore, 
     Request, 
     Response,
@@ -31,7 +31,7 @@ __version__ = "2.0.0"
 
 __all__ = [
     "SufastUltraOptimized",
-    "Sufast", 
+    "Sufast_server", 
     "RustCore",
     "Request",
     "Response",

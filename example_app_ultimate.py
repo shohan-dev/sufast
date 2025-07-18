@@ -8,10 +8,10 @@ Faster than FastAPI with zero overhead!
 """
 
 import json
-from sufast import SufastUltimateOptimized
+from sufast import Sufast
 
 # Create the ultimate optimized application
-app = SufastUltimateOptimized()
+app = Sufast()
 
 # ========================
 # ENHANCED DUMMY DATA

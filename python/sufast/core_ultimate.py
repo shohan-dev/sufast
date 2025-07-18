@@ -14,7 +14,7 @@ import threading
 from pathlib import Path
 from typing import Dict, Any, Optional, Callable, Union
 
-class SufastUltimateOptimized:
+class Sufast:
     """Ultimate Sufast framework with three-tier performance optimization."""
     
     def __init__(self):
@@ -405,9 +405,9 @@ class SufastUltimateOptimized:
 
 
 def create_app():
-    """Create a new SufastUltimateOptimized application instance."""
-    return SufastUltimateOptimized()
+    """Create a new Sufast application instance."""
+    return Sufast()
 
 
 # Export the main class
-__all__ = ['SufastUltimateOptimized', 'create_app']
+__all__ = ['Sufast', 'create_app']
