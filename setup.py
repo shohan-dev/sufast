@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as f:
 
 setup(
     name="sufast",
-    version="0.2.4",  # Bump the version!
+    version="0.3.0",  # Bump the version!
     author="Shohan",
     author_email="shohan.dev.cse@gmail.com",
     description="A blazing-fast Python web framework powered by Rust 🚀",
