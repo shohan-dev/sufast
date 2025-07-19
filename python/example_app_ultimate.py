@@ -1,10 +1,10 @@
 """
-Ultra-Fast Sufast v2.0 Example - Beats FastAPI Performance!
-This demonstrates the ultra-fast optimization system:
-- Static routes: 70K+ RPS (pre-compiled responses)
-- Cached routes: 60K+ RPS (intelligent caching)
-- Dynamic routes: 5K+ RPS (real-time processing with parameters)
-Faster than FastAPI with zero overhead!
+Ultra-Fast Sufast v2.0 Example
+This demonstrates the three-tier optimization system:
+- Static routes: High performance (pre-compiled responses)
+- Cached routes: Medium performance (intelligent caching)
+- Dynamic routes: Standard performance (real-time processing with parameters)
+Modern web framework with zero overhead!
 """
 
 import json
@@ -522,6 +522,22 @@ def get_category(category):
 # ========================
 # DEMO AND TESTING ROUTES
 # ========================
+@app.route('/fine')
+def fine():
+    """Fine-tuning demo - static route (52K+ RPS)."""
+    return {
+        'message': '🎉 Sufast Ultimate v2.0 is running smoothly!',
+        'performance': 'Static route - 52,000+ RPS',
+        'optimization': 'Pre-compiled response',
+        'status': 'All systems operational',
+        'next_steps': [
+            'Explore the /demo route for interactive testing',
+            'Check /docs for auto-generated documentation',
+            'Visit /categories for cached data'
+        ]
+    }
+
+
 
 @app.route('/demo')
 def demo():
@@ -563,13 +579,16 @@ def demo():
         'architecture_info': 'Each tier is optimized for different use cases and performance characteristics.'
     }
 
+# ========================
+# DOCUMENTATION IS AUTO-GENERATED!
+# The /docs route is automatically available - no setup needed!
+# Just like FastAPI, visit /docs to see all your routes
+# ========================
+
 if __name__ == "__main__":
-    print("🚀 Starting Sufast Ultimate v2.0 Demo")
-    print("📊 Three-Tier Performance Architecture:")
-    print("  🔥 Static Routes:  52,000+ RPS")
-    print("  🧠 Cached Routes:  45,000+ RPS") 
-    print("  ⚡ Dynamic Routes:  2,000+ RPS")
-    print()
+    # 🎉 Documentation is automatically available at /docs
+    # No need to manually create or enable it - it's built into the framework!
     
-    # Run the ultimate optimized server
-    app.run( port=8080)
+    
+    # Just run the server - /docs is automatically available
+    app.run(host="127.0.0.1", port=8080)

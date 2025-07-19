@@ -564,12 +564,12 @@ def demo():
     }
 
 if __name__ == "__main__":
-    print("🚀 Starting Sufast Ultimate v2.0 Demo")
+    print("🚀 Starting Sufast v2.0 Demo")
     print("📊 Three-Tier Performance Architecture:")
-    print("  🔥 Static Routes:  52,000+ RPS")
-    print("  🧠 Cached Routes:  45,000+ RPS") 
-    print("  ⚡ Dynamic Routes:  2,000+ RPS")
+    print("  🔥 Static Routes:  Pre-compiled responses")
+    print("  🧠 Cached Routes:  Intelligent caching") 
+    print("  ⚡ Dynamic Routes:  Real-time processing")
     print()
     
-    # Run the ultimate optimized server
-    app.run(host="127.0.0.1", port=8080)
+    # Run the optimized server
+    app.run(host="0.0.0.0", port=8080)

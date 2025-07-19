@@ -1,16 +1,17 @@
 use axum::{
+    body::Body,
     extract::{Path, Query},
     http::{HeaderMap, Method, StatusCode, Uri},
     response::Response,
-    routing::{get, post, put, delete},
-    Router, body::Body,
+    routing::{delete, get, post, put},
+    Router,
 };
 use dashmap::DashMap;
 use once_cell::sync::Lazy;
 use regex::Regex;
 use serde_json::{json, Value};
 use std::collections::HashMap;
-use std::ffi::{CStr, CString, c_char};
+use std::ffi::{c_char, CStr, CString};
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
@@ -18,17 +19,17 @@ use tokio::net::TcpListener;
 use tower_http::cors::CorsLayer;
 
 // ========================
-// ULTRA-FAST PERFORMANCE OPTIMIZATION
-// Faster than FastAPI with zero overhead
+// PERFORMANCE OPTIMIZATION
+// Fast HTTP server core
 // ========================
 
-// Static responses: Pre-compiled for instant delivery (70K+ RPS)
+// Static responses: Pre-compiled for instant delivery
 static STATIC_RESPONSES: Lazy<DashMap<String, StaticResponse>> = Lazy::new(DashMap::new);
 
-// Response cache: Intelligent caching for dynamic routes (60K+ RPS)
+// Response cache: Intelligent caching for dynamic routes
 static RESPONSE_CACHE: Lazy<DashMap<String, CachedResponse>> = Lazy::new(DashMap::new);
 
-// Dynamic patterns: Ultra-fast pattern matching (5K+ RPS)
+// Dynamic patterns: Fast pattern matching
 static DYNAMIC_ROUTES: Lazy<DashMap<String, DynamicRoute>> = Lazy::new(DashMap::new);
 
 // Performance counters
@@ -65,10 +66,11 @@ type PythonCallback = extern "C" fn(*const c_char, *const c_char, *const c_char)
 static mut PYTHON_CALLBACK: Option<PythonCallback> = None;
 
 // Response pool to prevent memory leaks
-static RESPONSE_POOL: Lazy<Arc<Mutex<Vec<CString>>>> = Lazy::new(|| Arc::new(Mutex::new(Vec::new())));
+static RESPONSE_POOL: Lazy<Arc<Mutex<Vec<CString>>>> =
+    Lazy::new(|| Arc::new(Mutex::new(Vec::new())));
 
 // ========================
-// ULTRA-FAST HANDLER - BEATS FASTAPI
+// FAST HANDLER
 // ========================
 
 async fn ultra_fast_handler(
@@ -82,43 +84,42 @@ async fn ultra_fast_handler(
     let method_str = method.as_str();
     let route_key = format!("{}:{}", method_str, path);
 
-    // TIER 1: Static responses (70K+ RPS) - Pre-compiled, zero overhead
+    // TIER 1: Static responses - Pre-compiled, zero overhead
     if let Some(static_resp) = STATIC_RESPONSES.get(&route_key) {
         STATIC_HITS.fetch_add(1, Ordering::Relaxed);
-        
-        let mut response_builder = Response::builder()
-            .status(static_resp.status);
-            
+
+        let mut response_builder = Response::builder().status(static_resp.status);
+
         for (key, value) in &static_resp.headers {
             response_builder = response_builder.header(key, value);
         }
-        
+
         return response_builder
             .header("x-sufast-tier", "static")
-            .header("x-sufast-performance", "70000-rps")
             .header("x-sufast-request-id", request_id.to_string())
             .header("server", "sufast-ultra")
             .body(Body::from(static_resp.body.clone()))
             .unwrap();
     }
 
-    // TIER 2: Cache lookup (60K+ RPS) - Ultra-fast cache
+    // TIER 2: Cache lookup - Fast cache
     if let Some(cached) = RESPONSE_CACHE.get(&route_key) {
         if cached.cached_at.elapsed() < cached.ttl {
             CACHE_HITS.fetch_add(1, Ordering::Relaxed);
-            
-            let mut response_builder = Response::builder()
-                .status(cached.status);
-                
+
+            let mut response_builder = Response::builder().status(cached.status);
+
             for (key, value) in &cached.headers {
                 response_builder = response_builder.header(key, value);
             }
-            
+
             return response_builder
                 .header("x-sufast-tier", "cached")
-                .header("x-sufast-performance", "60000-rps")
                 .header("x-sufast-request-id", request_id.to_string())
-                .header("x-sufast-cache-age", cached.cached_at.elapsed().as_secs().to_string())
+                .header(
+                    "x-sufast-cache-age",
+                    cached.cached_at.elapsed().as_secs().to_string(),
+                )
                 .header("server", "sufast-ultra")
                 .body(Body::from(cached.body.clone()))
                 .unwrap();
@@ -128,17 +129,17 @@ async fn ultra_fast_handler(
         }
     }
 
-    // TIER 3: Dynamic processing (5K+ RPS) - Ultra-optimized Python callback
+    // TIER 3: Dynamic processing - Optimized Python callback
     DYNAMIC_HITS.fetch_add(1, Ordering::Relaxed);
-    
-    // Ultra-fast pattern matching
+
+    // Fast pattern matching
     for route_entry in DYNAMIC_ROUTES.iter() {
         let route = route_entry.value();
         if let Some(captures) = route.regex.captures(path) {
             // Extract parameters with zero-copy
             let mut params_json = String::from("{");
             let mut first = true;
-            
+
             for name in route.regex.capture_names() {
                 if let Some(name) = name {
                     if let Some(value) = captures.name(name) {
@@ -153,7 +154,9 @@ async fn ultra_fast_handler(
             params_json.push('}');
 
             // Call Python handler with optimized parameters
-            if let Ok((body, status, response_headers)) = call_ultra_fast_python_handler(method_str, path, &params_json).await {
+            if let Ok((body, status, response_headers)) =
+                call_ultra_fast_python_handler(method_str, path, &params_json).await
+            {
                 // Cache successful responses
                 if status == 200 && route.cache_ttl.is_some() {
                     let cached = CachedResponse {
@@ -170,10 +173,9 @@ async fn ultra_fast_handler(
                 for (key, value) in &response_headers {
                     response_builder = response_builder.header(key, value);
                 }
-                
+
                 return response_builder
                     .header("x-sufast-tier", "dynamic")
-                    .header("x-sufast-performance", "5000-rps")
                     .header("x-sufast-request-id", request_id.to_string())
                     .header("x-sufast-handler", &route.handler_name)
                     .header("server", "sufast-ultra")
@@ -183,17 +185,10 @@ async fn ultra_fast_handler(
         }
     }
 
-    // Ultra-fast 404 with performance stats
+    // 404 fallback
     let stats = json!({
         "error": "Route not found",
         "status": 404,
-        "performance": {
-            "static_hits": STATIC_HITS.load(Ordering::Relaxed),
-            "cache_hits": CACHE_HITS.load(Ordering::Relaxed),
-            "dynamic_hits": DYNAMIC_HITS.load(Ordering::Relaxed),
-            "total_requests": request_id,
-            "rps_estimate": calculate_rps()
-        },
         "path": path,
         "method": method_str,
         "server": "sufast-ultra"
@@ -219,7 +214,11 @@ async fn call_ultra_fast_python_handler(
             let path_cstr = CString::new(path).map_err(|e| e.to_string())?;
             let params_cstr = CString::new(params_json).map_err(|e| e.to_string())?;
 
-            let result_ptr = callback(method_cstr.as_ptr(), path_cstr.as_ptr(), params_cstr.as_ptr());
+            let result_ptr = callback(
+                method_cstr.as_ptr(),
+                path_cstr.as_ptr(),
+                params_cstr.as_ptr(),
+            );
             if result_ptr.is_null() {
                 return Err("Python callback returned null".to_string());
             }
@@ -227,15 +226,15 @@ async fn call_ultra_fast_python_handler(
             let c_str = CStr::from_ptr(result_ptr);
             let response_json = c_str.to_string_lossy();
 
-            // Parse ultra-fast response
+            // Parse fast response
             if let Ok(response_data) = serde_json::from_str::<Value>(&response_json) {
                 let body = response_data["body"].as_str().unwrap_or("{}").to_string();
                 let status = response_data["status"].as_u64().unwrap_or(200) as u16;
-                
+
                 let mut headers = HashMap::new();
                 headers.insert("content-type".to_string(), "application/json".to_string());
                 headers.insert("x-sufast-engine".to_string(), "rust-python-ffi".to_string());
-                
+
                 if let Some(response_headers) = response_data["headers"].as_object() {
                     for (key, value) in response_headers {
                         if let Some(value_str) = value.as_str() {
@@ -243,7 +242,7 @@ async fn call_ultra_fast_python_handler(
                         }
                     }
                 }
-                
+
                 return Ok((body, status, headers));
             }
         }
@@ -251,24 +250,10 @@ async fn call_ultra_fast_python_handler(
     Err("Python callback failed".to_string())
 }
 
-fn calculate_rps() -> f64 {
-    let total = TOTAL_REQUESTS.load(Ordering::Relaxed);
-    if total > 100 {
-        // Estimate based on request distribution
-        let static_pct = (STATIC_HITS.load(Ordering::Relaxed) as f64 / total as f64) * 100.0;
-        let cache_pct = (CACHE_HITS.load(Ordering::Relaxed) as f64 / total as f64) * 100.0;
-        let dynamic_pct = (DYNAMIC_HITS.load(Ordering::Relaxed) as f64 / total as f64) * 100.0;
-        
-        (static_pct * 700.0 + cache_pct * 600.0 + dynamic_pct * 50.0) / 100.0
-    } else {
-        0.0
-    }
-}
-
 // ========================
-// ULTIMATE PERFORMANCE HANDLER
+// PERFORMANCE HANDLER
 // ========================
-// ULTRA-FAST ROUTE REGISTRATION
+// FAST ROUTE REGISTRATION
 // ========================
 
 #[no_mangle]
@@ -294,7 +279,10 @@ pub extern "C" fn add_static_route(
         let mut headers = HashMap::new();
         headers.insert("content-type".to_string(), content_type_str);
         headers.insert("x-sufast-optimized".to_string(), "static".to_string());
-        headers.insert("cache-control".to_string(), "public, max-age=31536000".to_string());
+        headers.insert(
+            "cache-control".to_string(),
+            "public, max-age=31536000".to_string(),
+        );
 
         let static_response = StaticResponse {
             body: body_str,
@@ -322,7 +310,7 @@ pub extern "C" fn add_dynamic_route(
         let pattern_str = CStr::from_ptr(pattern).to_string_lossy().to_string();
         let handler_str = CStr::from_ptr(handler_name).to_string_lossy().to_string();
 
-        // Compile ultra-fast regex pattern
+        // Compile fast regex pattern
         if let Ok(regex) = compile_ultra_fast_pattern(&pattern_str) {
             let cache_ttl = if cache_ttl_seconds > 0 {
                 Some(Duration::from_secs(cache_ttl_seconds))
@@ -346,8 +334,8 @@ pub extern "C" fn add_dynamic_route(
 
 fn compile_ultra_fast_pattern(pattern: &str) -> Result<Regex, regex::Error> {
     let mut regex_pattern = pattern.to_string();
-    
-    // Ultra-fast parameter replacement
+
+    // Fast parameter replacement
     while let Some(start) = regex_pattern.find('{') {
         if let Some(end) = regex_pattern[start..].find('}') {
             let param_name = &regex_pattern[start + 1..start + end];
@@ -357,7 +345,7 @@ fn compile_ultra_fast_pattern(pattern: &str) -> Result<Regex, regex::Error> {
             break;
         }
     }
-    
+
     // Compile with optimizations
     Regex::new(&format!("^{}$", regex_pattern))
 }
@@ -381,7 +369,6 @@ pub extern "C" fn get_performance_stats() -> *mut c_char {
         "static_hits": static_hits,
         "cache_hits": cache_hits,
         "dynamic_hits": dynamic_hits,
-        "estimated_rps": calculate_rps(),
         "performance_breakdown": {
             "static_percentage": if total > 0 { (static_hits as f64 / total as f64) * 100.0 } else { 0.0 },
             "cache_percentage": if total > 0 { (cache_hits as f64 / total as f64) * 100.0 } else { 0.0 },
@@ -392,7 +379,6 @@ pub extern "C" fn get_performance_stats() -> *mut c_char {
             "cached_responses": RESPONSE_CACHE.len(),
             "dynamic_patterns": DYNAMIC_ROUTES.len()
         },
-        "optimization_level": "Ultra-Fast (Beats FastAPI)",
         "server": "sufast-ultra"
     });
 
@@ -409,19 +395,42 @@ pub extern "C" fn clear_cache() -> bool {
 
 #[no_mangle]
 pub extern "C" fn precompile_static_routes() -> u64 {
-    // Pre-compile ultra-fast static routes
+    // Pre-compile static routes
     let routes = vec![
-        ("GET:/", r#"{"message":"🚀 Welcome to Sufast Ultra v2.0!","performance":"Static route - 70,000+ RPS","optimization":"Ultra-fast pre-compiled","server":"sufast-ultra"}"#, 200, "application/json"),
-        ("GET:/health", r#"{"status":"healthy","performance":"Static route - 70,000+ RPS","service":"sufast-ultra","uptime":"99.9%","server":"sufast-ultra"}"#, 200, "application/json"),
-        ("GET:/about", r#"{"page":"about","framework":"Sufast Ultra","performance":"Static route - 70,000+ RPS","version":"2.0","server":"sufast-ultra"}"#, 200, "application/json"),
-        ("GET:/api/status", r#"{"api":"active","optimization":"ultra-fast","performance":"Static route - 70,000+ RPS","status":"operational","server":"sufast-ultra"}"#, 200, "application/json"),
+        (
+            "GET:/",
+            r#"{"message":"🚀 Welcome to Sufast Ultra v2.0!","optimization":"Pre-compiled","server":"sufast-ultra"}"#,
+            200,
+            "application/json",
+        ),
+        (
+            "GET:/health",
+            r#"{"status":"healthy","service":"sufast-ultra","server":"sufast-ultra"}"#,
+            200,
+            "application/json",
+        ),
+        (
+            "GET:/about",
+            r#"{"page":"about","framework":"Sufast Ultra","version":"2.0","server":"sufast-ultra"}"#,
+            200,
+            "application/json",
+        ),
+        (
+            "GET:/api/status",
+            r#"{"api":"active","optimization":"fast","status":"operational","server":"sufast-ultra"}"#,
+            200,
+            "application/json",
+        ),
     ];
 
     for (route_key, body, status, content_type) in routes {
         let mut headers = HashMap::new();
         headers.insert("content-type".to_string(), content_type.to_string());
         headers.insert("x-sufast-precompiled".to_string(), "true".to_string());
-        headers.insert("cache-control".to_string(), "public, max-age=31536000".to_string());
+        headers.insert(
+            "cache-control".to_string(),
+            "public, max-age=31536000".to_string(),
+        );
         headers.insert("server".to_string(), "sufast-ultra".to_string());
 
         let static_response = StaticResponse {
@@ -437,24 +446,42 @@ pub extern "C" fn precompile_static_routes() -> u64 {
 }
 
 #[no_mangle]
-pub extern "C" fn start_ultra_fast_server(port: u16) -> i32 {
+pub extern "C" fn start_ultra_fast_server(host: *const c_char, port: u16) -> i32 {
+    if host.is_null() {
+        eprintln!("❌ Host parameter cannot be null");
+        return -1;
+    }
+
+    let host_str = unsafe {
+        match CStr::from_ptr(host).to_str() {
+            Ok(s) => s,
+            Err(e) => {
+                eprintln!("❌ Invalid host string: {}", e);
+                return -1;
+            }
+        }
+    };
+
     tokio::runtime::Runtime::new().unwrap().block_on(async {
         let app = Router::new()
             .fallback(ultra_fast_handler)
             .layer(CorsLayer::permissive());
 
-        let addr = format!("127.0.0.1:{}", port);
-        let listener = TcpListener::bind(&addr).await.unwrap();
-        
-        println!("🚀 Sufast Ultra-Fast Server v2.0 (Beats FastAPI!)");
-        println!("⚡ Performance Targets:");
-        println!("   • Static Routes: 70,000+ RPS");
-        println!("   • Cached Routes: 60,000+ RPS"); 
-        println!("   • Dynamic Routes: 5,000+ RPS");
-        println!("🎯 Ultra-fast optimization active");
-        println!("🌐 Server listening on {}", addr);
-        
-        axum::serve(listener, app).await.unwrap();
-        0
+        let addr = format!("{}:{}", host_str, port);
+        let listener = match TcpListener::bind(&addr).await {
+            Ok(listener) => listener,
+            Err(e) => {
+                eprintln!("❌ Failed to bind to {}: {}", addr, e);
+                return -1;
+            }
+        };
+
+        match axum::serve(listener, app).await {
+            Ok(_) => 0,
+            Err(e) => {
+                eprintln!("❌ Server error: {}", e);
+                -1
+            }
+        }
     })
 }
