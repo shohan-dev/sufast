@@ -13,7 +13,7 @@ Built for high-performance APIs, enterprise microservices, and AI-powered backen
 
 > **🎯 Performance First**: Achieve **70,000+ RPS** with our revolutionary three-tier architecture while maintaining the simplicity of FastAPI-style development.
 
-## 🆕 What's New in v2.0
+## 🆕 What's New
 
 ### 🏗️ Advanced API Organization
 - **RouteGroup System**: Organize related endpoints with logical grouping and prefix support
@@ -117,7 +117,7 @@ def hello():
     return {"message": "Hello from Sufast! �", "performance": "70K+ RPS"}
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
+    app.run(port=8080)
 ```
 
 Run your app:
