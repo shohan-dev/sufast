@@ -13,6 +13,25 @@ Built for high-performance APIs, enterprise microservices, and AI-powered backen
 
 > **🎯 Performance First**: Achieve **70,000+ RPS** with our revolutionary three-tier architecture while maintaining the simplicity of FastAPI-style development.
 
+## 🆕 What's New in v2.0
+
+### 🏗️ Advanced API Organization
+- **RouteGroup System**: Organize related endpoints with logical grouping and prefix support
+- **Smart Tagging**: Auto-tagging based on patterns plus manual tag assignment for enhanced discovery
+- **Enhanced HTTP Methods**: Complete REST support (GET, POST, PUT, DELETE, PATCH) with intelligent defaults
+
+### 📖 Interactive Documentation Revolution
+- **Three View Modes**: Performance Tiers, Groups, and Tags for different perspectives
+- **Real-time Filtering**: Search and filter endpoints by tags, groups, or functionality
+- **Live API Testing**: Execute requests directly from documentation interface
+- **Rich Metadata**: Summaries, descriptions, examples, and comprehensive route information
+
+### 🎯 Developer Experience Enhancements
+- **API Introspection**: `get_all_tags()`, `get_routes_by_group()`, `get_routes_by_tag()` methods
+- **Visual Organization**: Color-coded performance tiers and intuitive grouping
+- **Enhanced Decorators**: Extended `@app.get()`, `@app.post()` etc. with tags, groups, summaries
+- **Smart Auto-Documentation**: Automatic documentation generation with OpenAPI-style interface
+
 ## ⚡ Why Choose Sufast?
 
 ### 🚀 ** Performance**
@@ -28,6 +47,10 @@ Built for high-performance APIs, enterprise microservices, and AI-powered backen
 
 ### 🐍 **Developer Experience**
 - FastAPI-style decorator syntax (`@app.route`, `@app.get`, `@app.post`)
+- **Advanced Route Organization** with groups and tags
+- **Interactive API Documentation** with filtering and search
+- **Enhanced HTTP Methods** (GET, POST, PUT, DELETE, PATCH)
+- **Smart Auto-Documentation** with OpenAPI-style interface
 - Type hints and automatic validation support
 - Hot reload for development
 - Comprehensive error handling and debugging
@@ -35,6 +58,9 @@ Built for high-performance APIs, enterprise microservices, and AI-powered backen
 ### 🔧 **Production Ready**
 - Zero-configuration deployment
 - Built-in middleware support
+- **Advanced Route Groups** for API organization
+- **Tag-based Filtering** and discovery
+- **Interactive Documentation** at `/docs`
 - Request/response lifecycle hooks
 - Comprehensive logging and monitoring
 - Docker and Kubernetes ready
@@ -135,6 +161,131 @@ def get_user(user_id):
 
 app.run()
 ```
+
+# 🎯 Enhanced Developer Features (v2.0+)
+
+## 🏷️ Advanced Route Organization with Tags & Groups
+
+### Route Groups for API Organization
+```python
+from sufast import Sufast
+
+app = Sufast()
+
+# Create organized route groups
+users_group = app.group("User Management", prefix="/api/v1", tags=["api", "users"])
+products_group = app.group("Product Catalog", prefix="/api/v1", tags=["api", "products"])
+
+# Use groups for clean organization
+@users_group.get("/users", 
+                 tags=["list", "pagination"], 
+                 summary="List all users",
+                 description="Get paginated list of users with filtering")
+def list_users():
+    return {"users": [...], "total": 100}
+
+@users_group.get("/users/{user_id}", 
+                 tags=["profile", "details"])
+def get_user(user_id):
+    return {"id": user_id, "name": "User Name"}
+
+@products_group.post("/products", 
+                     tags=["create", "inventory"])
+def create_product():
+    return {"message": "Product created", "id": 123}
+```
+
+### Enhanced HTTP Method Decorators
+```python
+# Full REST API support with intelligent defaults
+@app.get("/items", cache_ttl=300, tags=["read", "catalog"])
+def list_items():
+    return {"items": [...]}
+
+@app.post("/items", tags=["create", "inventory"], group="Item Management")
+def create_item():
+    return {"created": True}
+
+@app.put("/items/{item_id}", tags=["update", "modify"])
+def update_item(item_id):
+    return {"updated": item_id}
+
+@app.delete("/items/{item_id}", tags=["delete", "cleanup"])
+def delete_item(item_id):
+    return {"deleted": item_id}
+
+@app.patch("/items/{item_id}", tags=["patch", "partial"])
+def patch_item(item_id):
+    return {"patched": item_id}
+```
+
+### Smart Tag-Based Organization
+```python
+# Use decorators for advanced tagging
+@app.tag("admin", "system", "monitoring")
+@app.summary("System health check")
+@app.description("Comprehensive health monitoring with detailed metrics")
+@app.get("/health", static=True, group="System Monitoring")
+def health_check():
+    return {"status": "healthy", "metrics": {...}}
+
+@app.tag("search", "discovery", "ai")
+@app.get("/search/{query}", group="Search & Discovery")
+def smart_search(query):
+    return {"query": query, "results": [...]}
+```
+
+## 📖 Interactive API Documentation
+
+### Auto-Generated Documentation at `/docs`
+- **Three View Modes**: Performance Tiers, Groups, and Tags
+- **Interactive Filtering**: Real-time tag-based filtering
+- **Advanced Search**: Search across endpoints, descriptions, and tags
+- **Live Testing**: Execute requests directly from documentation
+- **Rich Metadata**: Summaries, descriptions, examples, and response schemas
+
+### Query Your API Structure
+```python
+# Powerful introspection methods
+all_tags = app.get_all_tags()
+# Returns: ['admin', 'api', 'create', 'delete', 'read', 'system', ...]
+
+all_groups = app.get_all_groups()
+# Returns: ['User Management', 'Product Catalog', 'System Monitoring', ...]
+
+admin_routes = app.get_routes_by_tag("admin")
+user_routes = app.get_routes_by_group("User Management")
+
+# Get comprehensive route information
+print(f"📊 Total Routes: {len(app.route_metadata)}")
+print(f"🏷️ Total Tags: {len(app.get_all_tags())}")
+print(f"📁 Total Groups: {len(app.get_all_groups())}")
+```
+
+## 🎨 Enhanced Documentation Features
+
+### Rich Route Metadata
+```python
+@app.get("/products/{product_id}", 
+         tags=["products", "details", "e-commerce"],
+         group="Product Catalog",
+         summary="Get detailed product information",
+         description="Retrieve comprehensive product details including pricing, inventory, and related items")
+def get_product_details(product_id):
+    """Get detailed product with dynamic pricing and recommendations."""
+    return {
+        "product": {...},
+        "pricing": {...},
+        "recommendations": [...]
+    }
+```
+
+### Visual Organization Benefits
+- **Color-coded Performance Tiers**: Static (🔥), Cached (🧠), Dynamic (⚡)
+- **Group-based Navigation**: Logical API organization
+- **Tag-based Discovery**: Find related endpoints instantly
+- **Interactive Examples**: Pre-filled parameter examples
+- **Real-time Testing**: Execute API calls from documentation
 
 
 # 📚 Production-Ready API Example
@@ -479,7 +630,14 @@ def get_metrics():
 - ✅ **Sub-millisecond response times** for optimized routes
 
 ### Developer Experience
-- ✅ **FastAPI-style decorators** (`@app.route`, `@app.get`, `@app.post`)
+- ✅ **Advanced Route Organization** with groups and tags for better API structure
+- ✅ **Interactive API Documentation** with filtering, search, and live testing at `/docs`
+- ✅ **Enhanced HTTP Methods** with intelligent defaults (GET, POST, PUT, DELETE, PATCH)
+- ✅ **Smart Auto-Documentation** with rich metadata and visual organization
+- ✅ **FastAPI-style decorators** with extended capabilities (`@app.route`, `@app.get`, `@app.post`)
+- ✅ **Route Groups** for logical endpoint organization with prefix support
+- ✅ **Tag-based Discovery** for finding related endpoints instantly
+- ✅ **Real-time API Introspection** with `get_all_tags()`, `get_routes_by_group()` methods
 - ✅ **Type hints support** with automatic validation
 - ✅ **Hot reload** for development workflow
 - ✅ **Comprehensive error handling** with detailed debugging
@@ -487,6 +645,10 @@ def get_metrics():
 - ✅ **Rich middleware ecosystem** for custom functionality
 
 ### Production Ready
+- ✅ **Advanced Route Groups** for large-scale API organization and maintenance
+- ✅ **Tag-based Filtering** for efficient endpoint discovery and documentation
+- ✅ **Interactive Documentation** at `/docs` with three view modes and live testing
+- ✅ **Comprehensive Metadata** with summaries, descriptions, and examples
 - ✅ **Built-in health checks** and monitoring endpoints
 - ✅ **Structured logging** with configurable levels
 - ✅ **Request/response lifecycle hooks** for custom processing
@@ -496,7 +658,51 @@ def get_metrics():
 
 ## 🔧 Advanced Features
 
-### Route Types
+### Route Organization & Documentation
+```python
+# Advanced route groups with organization
+users_group = app.group("User Management", prefix="/api/v1", tags=["api", "users"])
+@users_group.get("/users", summary="List users", tags=["pagination"])
+def list_users(): ...
+
+# Rich metadata for enhanced documentation
+@app.get("/products/{id}", 
+         tags=["products", "details"], 
+         group="Product Catalog",
+         summary="Get product details",
+         description="Retrieve comprehensive product information")
+def get_product(id): ...
+
+# Tag-based organization and discovery
+@app.tag("admin", "monitoring")
+@app.get("/system/health", static=True)
+def health_check(): ...
+```
+
+### Enhanced HTTP Method Support
+```python
+# Complete REST API with intelligent defaults
+@app.get("/items", cache_ttl=300, tags=["read"])  # Auto-cached reads
+@app.post("/items", tags=["create"])              # Validated creates
+@app.put("/items/{id}", tags=["update"])          # Full updates
+@app.patch("/items/{id}", tags=["modify"])        # Partial updates
+@app.delete("/items/{id}", tags=["cleanup"])      # Safe deletes
+```
+
+### Interactive Documentation System
+```python
+# Three powerful view modes at /docs:
+# 1. Performance Tiers: Static (🔥) / Cached (🧠) / Dynamic (⚡)
+# 2. Groups: Organized by RouteGroup classifications
+# 3. Tags: Filter and discover by functionality
+
+# Real-time API introspection
+all_tags = app.get_all_tags()
+user_routes = app.get_routes_by_group("User Management")
+admin_endpoints = app.get_routes_by_tag("admin")
+```
+
+### Route Types & Performance
 ```python
 # Static routes (70K+ RPS)
 @app.route("/health", static=True)

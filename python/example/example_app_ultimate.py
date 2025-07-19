@@ -113,7 +113,7 @@ def home():
         }
     }
 
-@app.route('/about', static=True)
+@app.route('/about', static=True ,group="Main Fetatu23",)
 def about():
     """About page - pre-compiled static route (52K+ RPS)."""
     return {
@@ -144,7 +144,7 @@ def about():
         }
     }
 
-@app.route('/contact', static=True)
+@app.route('/contact', static=True,group="Main Fetatu23")
 def contact():
     """Contact page - pre-compiled static route (52K+ RPS)."""
     return {

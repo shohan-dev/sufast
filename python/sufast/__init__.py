@@ -9,12 +9,18 @@ Three-tier performance architecture:
 
 from .core_ultimate import Sufast, create_app
 from .database import DatabaseConnection
+from .middleware import CORSMiddleware, RateLimitMiddleware, AuthMiddleware, MiddlewareStack
+from .request import Request, Response, json_response, html_response
 
 # Legacy support
 from .core import SufastUltraOptimized as SufastLegacy
 
 __version__ = "2.0.0"
-__all__ = ["Sufast", "create_app", "DatabaseConnection", "SufastLegacy"]
+__all__ = [
+    "Sufast", "create_app", "DatabaseConnection", "SufastLegacy",
+    "CORSMiddleware", "RateLimitMiddleware", "AuthMiddleware", "MiddlewareStack",
+    "Request", "Response", "json_response", "html_response"
+]
 
 from .core import (
     SufastUltraOptimized, 
