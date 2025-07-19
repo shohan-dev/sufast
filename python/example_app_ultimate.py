@@ -522,7 +522,7 @@ def get_category(category):
 # ========================
 # DEMO AND TESTING ROUTES
 # ========================
-@app.route('/fine')
+@app.route('/fine', static=True)
 def fine():
     """Fine-tuning demo - static route (52K+ RPS)."""
     return {
@@ -591,4 +591,4 @@ if __name__ == "__main__":
     
     
     # Just run the server - /docs is automatically available
-    app.run(host="127.0.0.1", port=8080)
+    app.run(host="127.0.0.1", port=8080, doc=True)
