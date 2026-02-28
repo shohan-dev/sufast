@@ -1,6 +1,6 @@
 [package]
 name = "sufast-core"
-version = "2.0.0"
+version = "3.0.0"
 edition = "2021"
 authors = ["Shohan <shohan.dev.cse@gmail.com>"]
 description = "High-performance hybrid HTTP server core for the Sufast Python web framework"
@@ -17,7 +17,7 @@ path = "src/lib_ultimate.rs"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-axum = "0.7"
+axum = { version = "0.7", features = ["ws"] }
 tokio = { version = "1.0", features = ["full"] }
 tower = "0.4"
 tower-http = { version = "0.5", features = ["cors", "fs", "trace"] }
@@ -40,6 +40,9 @@ sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "sqlite", "chrono"
 uuid = { version = "1.0", features = ["v4", "serde"] }
 urlencoding = "2.1"
 once_cell = "1.19"
+hyper = { version = "1.0", features = ["full"] }
+http-body-util = "0.1"
+bytes = "1.0"
 
 [dev-dependencies]
 criterion = { version = "0.5", features = ["html_reports"] }

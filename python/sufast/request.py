@@ -9,7 +9,19 @@ from http.cookies import SimpleCookie
 
 
 class Request:
-    """HTTP Request object with all request data."""
+    """HTTP Request object with all request data.
+    
+    Provides lazy-parsed access to query parameters, JSON body,
+    form data, cookies, and other request metadata.
+    
+    Usage:
+        @app.post("/users")
+        async def create_user(request: Request):
+            data = request.json
+            name = request.query_params.get("name", "")
+            token = request.headers.get("authorization", "")
+            return {"user": data, "name": name}
+    """
     
     def __init__(self, method: str, path: str, headers: Dict[str, str], 
                  body: Union[bytes, str], query_string: str = "",
@@ -23,7 +35,7 @@ class Request:
         if isinstance(body, str):
             self.body = body.encode('utf-8')
         else:
-            self.body = body
+            self.body = body or b""
             
         self.query_string = query_string
         self._query_params = query_params  # Pre-parsed from Rust
@@ -32,6 +44,9 @@ class Request:
         self._cookies = None
         self.path_params = path_params or {}  # Pre-extracted from Rust
         self.remote_addr = headers.get('x-forwarded-for', '127.0.0.1')
+        
+        # Extra state for middleware and dependencies
+        self.state: Dict[str, Any] = {}
     
     @property
     def query_params(self) -> Dict[str, str]:
@@ -47,14 +62,12 @@ class Request:
     
     @property
     def json(self) -> Optional[Dict[str, Any]]:
-        """Parse request body as JSON."""
+        """Parse request body as JSON. Works for any JSON-like body."""
         if self._json_data is None and self.body:
-            content_type = self.headers.get('content-type', '')
-            if 'application/json' in content_type:
-                try:
-                    self._json_data = json.loads(self.body.decode('utf-8'))
-                except (json.JSONDecodeError, UnicodeDecodeError):
-                    return None
+            try:
+                self._json_data = json.loads(self.body.decode('utf-8'))
+            except (json.JSONDecodeError, UnicodeDecodeError):
+                return None
         return self._json_data
     
     @property
@@ -117,6 +130,36 @@ class Request:
     def user_agent(self) -> str:
         """Get user agent string."""
         return self.headers.get('user-agent', '')
+    
+    @property
+    def url(self) -> str:
+        """Full request URL including query string."""
+        if self.query_string:
+            return f"{self.path}?{self.query_string}"
+        return self.path
+    
+    @property
+    def text(self) -> str:
+        """Body as text."""
+        return self.body.decode('utf-8', errors='replace')
+    
+    @property
+    def host(self) -> str:
+        """Request host."""
+        return self.headers.get('host', 'localhost')
+    
+    @property
+    def accept(self) -> str:
+        """Accept header."""
+        return self.headers.get('accept', '*/*')
+    
+    @property
+    def authorization(self) -> Optional[str]:
+        """Authorization header."""
+        return self.headers.get('authorization')
+    
+    def __repr__(self) -> str:
+        return f"<Request {self.method} {self.path}>"
 
 
 class Response:
@@ -176,15 +219,15 @@ class Response:
             headers['set-cookie'].append(cookie.OutputString())
         
         # Serialize content based on type
-        if self.content_type == 'application/json':
-            if self.content is None:
-                body = 'null'
-            else:
-                body = json.dumps(self.content, default=str)
-        elif isinstance(self.content, str):
+        if isinstance(self.content, str):
+            # Already a string - use as-is (avoids double JSON encoding)
             body = self.content
         elif isinstance(self.content, bytes):
             body = self.content.decode('utf-8', errors='replace')
+        elif self.content is None:
+            body = ''
+        elif 'application/json' in self.content_type:
+            body = json.dumps(self.content, default=str)
         else:
             body = str(self.content)
         

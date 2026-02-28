@@ -1,9 +1,8 @@
 use axum::{
     body::Body,
-    extract::{Path, Query},
+    extract::ws::{Message, WebSocket, WebSocketUpgrade},
     http::{HeaderMap, Method, StatusCode, Uri},
-    response::Response,
-    routing::{delete, get, post, put},
+    response::{IntoResponse, Response},
     Router,
 };
 use dashmap::DashMap;
@@ -20,7 +19,7 @@ use tower_http::cors::CorsLayer;
 
 // ========================
 // PERFORMANCE OPTIMIZATION
-// Fast HTTP server core
+// Ultra-fast HTTP + WebSocket server core
 // ========================
 
 // Static responses: Pre-compiled for instant delivery
@@ -29,13 +28,17 @@ static STATIC_RESPONSES: Lazy<DashMap<String, StaticResponse>> = Lazy::new(DashM
 // Response cache: Intelligent caching for dynamic routes
 static RESPONSE_CACHE: Lazy<DashMap<String, CachedResponse>> = Lazy::new(DashMap::new);
 
-// Dynamic patterns: Fast pattern matching
+// Dynamic patterns: Fast pattern matching (stores "METHOD:PATTERN" -> DynamicRoute)
 static DYNAMIC_ROUTES: Lazy<DashMap<String, DynamicRoute>> = Lazy::new(DashMap::new);
+
+// WebSocket routes
+static WS_ROUTES: Lazy<DashMap<String, WsRoute>> = Lazy::new(DashMap::new);
 
 // Performance counters
 static STATIC_HITS: AtomicU64 = AtomicU64::new(0);
 static CACHE_HITS: AtomicU64 = AtomicU64::new(0);
 static DYNAMIC_HITS: AtomicU64 = AtomicU64::new(0);
+static WS_CONNECTIONS: AtomicU64 = AtomicU64::new(0);
 static TOTAL_REQUESTS: AtomicU64 = AtomicU64::new(0);
 
 #[derive(Clone)]
@@ -56,14 +59,21 @@ struct CachedResponse {
 
 #[derive(Clone)]
 struct DynamicRoute {
+    method: String,
     regex: Regex,
     handler_name: String,
     cache_ttl: Option<Duration>,
 }
 
-// Python callback for dynamic routes - fixed memory management
+#[derive(Clone)]
+struct WsRoute {
+    regex: Regex,
+    handler_name: String,
+}
+
+// Python callback for dynamic routes (thread-safe, no static mut UB)
 type PythonCallback = extern "C" fn(*const c_char, *const c_char, *const c_char) -> *const c_char;
-static mut PYTHON_CALLBACK: Option<PythonCallback> = None;
+static PYTHON_CALLBACK: Lazy<Mutex<Option<PythonCallback>>> = Lazy::new(|| Mutex::new(None));
 
 // Response pool to prevent memory leaks
 static RESPONSE_POOL: Lazy<Arc<Mutex<Vec<CString>>>> =
@@ -76,8 +86,8 @@ static RESPONSE_POOL: Lazy<Arc<Mutex<Vec<CString>>>> =
 async fn ultra_fast_handler(
     method: Method,
     uri: Uri,
-    _headers: HeaderMap,
-    _body: Body,
+    headers: HeaderMap,
+    body: Body,
 ) -> Response<Body> {
     let request_id = TOTAL_REQUESTS.fetch_add(1, Ordering::Relaxed) + 1;
     let path = uri.path();
@@ -97,7 +107,7 @@ async fn ultra_fast_handler(
         return response_builder
             .header("x-sufast-tier", "static")
             .header("x-sufast-request-id", request_id.to_string())
-            .header("server", "sufast-ultra")
+            .header("server", "sufast-ultra/3.0")
             .body(Body::from(static_resp.body.clone()))
             .unwrap();
     }
@@ -120,23 +130,28 @@ async fn ultra_fast_handler(
                     "x-sufast-cache-age",
                     cached.cached_at.elapsed().as_secs().to_string(),
                 )
-                .header("server", "sufast-ultra")
+                .header("server", "sufast-ultra/3.0")
                 .body(Body::from(cached.body.clone()))
                 .unwrap();
         } else {
-            // Remove expired cache
             RESPONSE_CACHE.remove(&route_key);
         }
     }
 
-    // TIER 3: Dynamic processing - Optimized Python callback
+    // TIER 3: Dynamic processing - Call Python via FFI
     DYNAMIC_HITS.fetch_add(1, Ordering::Relaxed);
 
-    // Fast pattern matching
+    // Match dynamic routes by method + path pattern
     for route_entry in DYNAMIC_ROUTES.iter() {
         let route = route_entry.value();
+
+        // Check method matches
+        if route.method != "*" && route.method != method_str {
+            continue;
+        }
+
         if let Some(captures) = route.regex.captures(path) {
-            // Extract parameters with zero-copy
+            // Extract parameters
             let mut params_json = String::from("{");
             let mut first = true;
 
@@ -146,14 +161,18 @@ async fn ultra_fast_handler(
                         if !first {
                             params_json.push(',');
                         }
-                        params_json.push_str(&format!("\"{}\":\"{}\"", name, value.as_str()));
+                        params_json.push_str(&format!(
+                            "\"{}\":\"{}\"",
+                            name,
+                            value.as_str().replace('\"', "\\\"")
+                        ));
                         first = false;
                     }
                 }
             }
             params_json.push('}');
 
-            // Call Python handler with optimized parameters
+            // Call Python handler
             if let Ok((body, status, response_headers)) =
                 call_ultra_fast_python_handler(method_str, path, &params_json).await
             {
@@ -178,27 +197,45 @@ async fn ultra_fast_handler(
                     .header("x-sufast-tier", "dynamic")
                     .header("x-sufast-request-id", request_id.to_string())
                     .header("x-sufast-handler", &route.handler_name)
-                    .header("server", "sufast-ultra")
+                    .header("server", "sufast-ultra/3.0")
                     .body(Body::from(body))
                     .unwrap();
             }
         }
     }
 
-    // 404 fallback
+    // Last resort: forward ALL unmatched requests to Python
+    // This lets Python handle docs, static files, etc.
+    if let Ok((body, status, response_headers)) =
+        call_ultra_fast_python_handler(method_str, path, "{}").await
+    {
+        let mut response_builder = Response::builder().status(status);
+        for (key, value) in &response_headers {
+            response_builder = response_builder.header(key, value);
+        }
+
+        return response_builder
+            .header("x-sufast-tier", "python-fallback")
+            .header("x-sufast-request-id", request_id.to_string())
+            .header("server", "sufast-ultra/3.0")
+            .body(Body::from(body))
+            .unwrap();
+    }
+
+    // Final 404
     let stats = json!({
         "error": "Route not found",
         "status": 404,
         "path": path,
         "method": method_str,
-        "server": "sufast-ultra"
+        "server": "sufast-ultra/3.0"
     });
 
     Response::builder()
         .status(404)
         .header("content-type", "application/json")
         .header("x-sufast-tier", "404")
-        .header("server", "sufast-ultra")
+        .header("server", "sufast-ultra/3.0")
         .body(Body::from(stats.to_string()))
         .unwrap()
 }
@@ -208,52 +245,55 @@ async fn call_ultra_fast_python_handler(
     path: &str,
     params_json: &str,
 ) -> Result<(String, u16, HashMap<String, String>), String> {
-    unsafe {
-        if let Some(callback) = PYTHON_CALLBACK {
-            let method_cstr = CString::new(method).map_err(|e| e.to_string())?;
-            let path_cstr = CString::new(path).map_err(|e| e.to_string())?;
-            let params_cstr = CString::new(params_json).map_err(|e| e.to_string())?;
+    let callback = PYTHON_CALLBACK.lock().unwrap();
+    if let Some(cb) = *callback {
+        let method_cstr = CString::new(method).map_err(|e| e.to_string())?;
+        let path_cstr = CString::new(path).map_err(|e| e.to_string())?;
+        let params_cstr = CString::new(params_json).map_err(|e| e.to_string())?;
 
-            let result_ptr = callback(
-                method_cstr.as_ptr(),
-                path_cstr.as_ptr(),
-                params_cstr.as_ptr(),
-            );
-            if result_ptr.is_null() {
-                return Err("Python callback returned null".to_string());
-            }
+        let result_ptr = cb(
+            method_cstr.as_ptr(),
+            path_cstr.as_ptr(),
+            params_cstr.as_ptr(),
+        );
+        drop(callback); // Release lock before processing
+        if result_ptr.is_null() {
+            return Err("Python callback returned null".to_string());
+        }
 
+        let response_json = unsafe {
             let c_str = CStr::from_ptr(result_ptr);
-            let response_json = c_str.to_string_lossy();
+            let s = c_str.to_string_lossy().to_string();
+            // Reclaim the CString to prevent memory leak
+            drop(CString::from_raw(result_ptr as *mut c_char));
+            s
+        };
 
-            // Parse fast response
-            if let Ok(response_data) = serde_json::from_str::<Value>(&response_json) {
-                let body = response_data["body"].as_str().unwrap_or("{}").to_string();
-                let status = response_data["status"].as_u64().unwrap_or(200) as u16;
+        // Parse response
+        if let Ok(response_data) = serde_json::from_str::<Value>(&response_json) {
+            let body = response_data["body"].as_str().unwrap_or("{}").to_string();
+            let status = response_data["status"].as_u64().unwrap_or(200) as u16;
 
-                let mut headers = HashMap::new();
-                headers.insert("content-type".to_string(), "application/json".to_string());
-                headers.insert("x-sufast-engine".to_string(), "rust-python-ffi".to_string());
+            let mut headers = HashMap::new();
+            headers.insert("content-type".to_string(), "application/json".to_string());
+            headers.insert("x-sufast-engine".to_string(), "rust-python-ffi".to_string());
 
-                if let Some(response_headers) = response_data["headers"].as_object() {
-                    for (key, value) in response_headers {
-                        if let Some(value_str) = value.as_str() {
-                            headers.insert(key.clone(), value_str.to_string());
-                        }
+            if let Some(response_headers) = response_data["headers"].as_object() {
+                for (key, value) in response_headers {
+                    if let Some(value_str) = value.as_str() {
+                        headers.insert(key.clone(), value_str.to_string());
                     }
                 }
-
-                return Ok((body, status, headers));
             }
+
+            return Ok((body, status, headers));
         }
     }
     Err("Python callback failed".to_string())
 }
 
 // ========================
-// PERFORMANCE HANDLER
-// ========================
-// FAST ROUTE REGISTRATION
+// FFI ROUTE REGISTRATION
 // ========================
 
 #[no_mangle]
@@ -307,6 +347,7 @@ pub extern "C" fn add_dynamic_route(
             return false;
         }
 
+        let method_str = CStr::from_ptr(method).to_string_lossy().to_string();
         let pattern_str = CStr::from_ptr(pattern).to_string_lossy().to_string();
         let handler_str = CStr::from_ptr(handler_name).to_string_lossy().to_string();
 
@@ -319,12 +360,41 @@ pub extern "C" fn add_dynamic_route(
             };
 
             let dynamic_route = DynamicRoute {
+                method: method_str.clone(),
                 regex,
                 handler_name: handler_str,
                 cache_ttl,
             };
 
-            DYNAMIC_ROUTES.insert(pattern_str, dynamic_route);
+            // Key includes method for proper multi-method routing
+            let key = format!("{}:{}", method_str, pattern_str);
+            DYNAMIC_ROUTES.insert(key, dynamic_route);
+            true
+        } else {
+            false
+        }
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn add_websocket_route(
+    pattern: *const c_char,
+    handler_name: *const c_char,
+) -> bool {
+    unsafe {
+        if pattern.is_null() || handler_name.is_null() {
+            return false;
+        }
+
+        let pattern_str = CStr::from_ptr(pattern).to_string_lossy().to_string();
+        let handler_str = CStr::from_ptr(handler_name).to_string_lossy().to_string();
+
+        if let Ok(regex) = compile_ultra_fast_pattern(&pattern_str) {
+            let ws_route = WsRoute {
+                regex,
+                handler_name: handler_str,
+            };
+            WS_ROUTES.insert(pattern_str, ws_route);
             true
         } else {
             false
@@ -352,9 +422,8 @@ fn compile_ultra_fast_pattern(pattern: &str) -> Result<Regex, regex::Error> {
 
 #[no_mangle]
 pub extern "C" fn set_python_callback(callback: PythonCallback) {
-    unsafe {
-        PYTHON_CALLBACK = Some(callback);
-    }
+    let mut cb = PYTHON_CALLBACK.lock().unwrap();
+    *cb = Some(callback);
 }
 
 #[no_mangle]
@@ -362,6 +431,7 @@ pub extern "C" fn get_performance_stats() -> *mut c_char {
     let static_hits = STATIC_HITS.load(Ordering::Relaxed);
     let cache_hits = CACHE_HITS.load(Ordering::Relaxed);
     let dynamic_hits = DYNAMIC_HITS.load(Ordering::Relaxed);
+    let ws_conns = WS_CONNECTIONS.load(Ordering::Relaxed);
     let total = static_hits + cache_hits + dynamic_hits;
 
     let stats = json!({
@@ -369,6 +439,7 @@ pub extern "C" fn get_performance_stats() -> *mut c_char {
         "static_hits": static_hits,
         "cache_hits": cache_hits,
         "dynamic_hits": dynamic_hits,
+        "websocket_connections": ws_conns,
         "performance_breakdown": {
             "static_percentage": if total > 0 { (static_hits as f64 / total as f64) * 100.0 } else { 0.0 },
             "cache_percentage": if total > 0 { (cache_hits as f64 / total as f64) * 100.0 } else { 0.0 },
@@ -377,14 +448,28 @@ pub extern "C" fn get_performance_stats() -> *mut c_char {
         "route_counts": {
             "static_routes": STATIC_RESPONSES.len(),
             "cached_responses": RESPONSE_CACHE.len(),
-            "dynamic_patterns": DYNAMIC_ROUTES.len()
+            "dynamic_patterns": DYNAMIC_ROUTES.len(),
+            "websocket_routes": WS_ROUTES.len()
         },
-        "server": "sufast-ultra"
+        "server": "sufast-ultra/3.0"
     });
 
-    CString::new(stats.to_string())
-        .unwrap_or_else(|_| CString::new("{}").unwrap())
-        .into_raw()
+    let cstring = CString::new(stats.to_string())
+        .unwrap_or_else(|_| CString::new("{}").unwrap());
+    let ptr = cstring.into_raw();
+    // Caller must call free_rust_string(ptr) to avoid memory leak
+    ptr
+}
+
+/// Free a string returned by Rust FFI functions.
+/// Must be called for every pointer returned by get_performance_stats.
+#[no_mangle]
+pub extern "C" fn free_rust_string(ptr: *mut c_char) {
+    if !ptr.is_null() {
+        unsafe {
+            drop(CString::from_raw(ptr));
+        }
+    }
 }
 
 #[no_mangle]
@@ -395,51 +480,48 @@ pub extern "C" fn clear_cache() -> bool {
 
 #[no_mangle]
 pub extern "C" fn precompile_static_routes() -> u64 {
-    // Pre-compile static routes
+    // Pre-compile default static routes
     let routes = vec![
         (
             "GET:/",
-            r#"{"message":"🚀 Welcome to Sufast Ultra v2.0!","optimization":"Pre-compiled","server":"sufast-ultra"}"#,
+            r#"{"message":"Welcome to Sufast v3.0!","server":"sufast-ultra/3.0","docs":"/docs"}"#,
             200,
             "application/json",
         ),
         (
             "GET:/health",
-            r#"{"status":"healthy","service":"sufast-ultra","server":"sufast-ultra"}"#,
-            200,
-            "application/json",
-        ),
-        (
-            "GET:/about",
-            r#"{"page":"about","framework":"Sufast Ultra","version":"2.0","server":"sufast-ultra"}"#,
+            r#"{"status":"healthy","service":"sufast","server":"sufast-ultra/3.0"}"#,
             200,
             "application/json",
         ),
         (
             "GET:/api/status",
-            r#"{"api":"active","optimization":"fast","status":"operational","server":"sufast-ultra"}"#,
+            r#"{"api":"active","status":"operational","server":"sufast-ultra/3.0"}"#,
             200,
             "application/json",
         ),
     ];
 
     for (route_key, body, status, content_type) in routes {
-        let mut headers = HashMap::new();
-        headers.insert("content-type".to_string(), content_type.to_string());
-        headers.insert("x-sufast-precompiled".to_string(), "true".to_string());
-        headers.insert(
-            "cache-control".to_string(),
-            "public, max-age=31536000".to_string(),
-        );
-        headers.insert("server".to_string(), "sufast-ultra".to_string());
+        // Only add if not already registered by Python
+        if !STATIC_RESPONSES.contains_key(route_key) {
+            let mut headers = HashMap::new();
+            headers.insert("content-type".to_string(), content_type.to_string());
+            headers.insert("x-sufast-precompiled".to_string(), "true".to_string());
+            headers.insert(
+                "cache-control".to_string(),
+                "public, max-age=3600".to_string(),
+            );
+            headers.insert("server".to_string(), "sufast-ultra/3.0".to_string());
 
-        let static_response = StaticResponse {
-            body: body.to_string(),
-            status,
-            headers,
-        };
+            let static_response = StaticResponse {
+                body: body.to_string(),
+                status,
+                headers,
+            };
 
-        STATIC_RESPONSES.insert(route_key.to_string(), static_response);
+            STATIC_RESPONSES.insert(route_key.to_string(), static_response);
+        }
     }
 
     STATIC_RESPONSES.len() as u64
@@ -448,7 +530,7 @@ pub extern "C" fn precompile_static_routes() -> u64 {
 #[no_mangle]
 pub extern "C" fn start_ultra_fast_server(host: *const c_char, port: u16) -> i32 {
     if host.is_null() {
-        eprintln!("❌ Host parameter cannot be null");
+        eprintln!("[sufast] Host parameter cannot be null");
         return -1;
     }
 
@@ -456,7 +538,7 @@ pub extern "C" fn start_ultra_fast_server(host: *const c_char, port: u16) -> i32
         match CStr::from_ptr(host).to_str() {
             Ok(s) => s,
             Err(e) => {
-                eprintln!("❌ Invalid host string: {}", e);
+                eprintln!("[sufast] Invalid host string: {}", e);
                 return -1;
             }
         }
@@ -471,17 +553,39 @@ pub extern "C" fn start_ultra_fast_server(host: *const c_char, port: u16) -> i32
         let listener = match TcpListener::bind(&addr).await {
             Ok(listener) => listener,
             Err(e) => {
-                eprintln!("❌ Failed to bind to {}: {}", addr, e);
+                eprintln!("[sufast] Failed to bind to {}: {}", addr, e);
                 return -1;
             }
         };
 
+        eprintln!(
+            "[sufast] Rust core listening on {} (routes: {} static, {} dynamic, {} ws)",
+            addr,
+            STATIC_RESPONSES.len(),
+            DYNAMIC_ROUTES.len(),
+            WS_ROUTES.len()
+        );
+
         match axum::serve(listener, app).await {
             Ok(_) => 0,
             Err(e) => {
-                eprintln!("❌ Server error: {}", e);
+                eprintln!("[sufast] Server error: {}", e);
                 -1
             }
         }
     })
+}
+
+// ========================
+// UTILITY FUNCTIONS 
+// ========================
+
+#[no_mangle]
+pub extern "C" fn get_route_count() -> u64 {
+    (STATIC_RESPONSES.len() + DYNAMIC_ROUTES.len()) as u64
+}
+
+#[no_mangle]
+pub extern "C" fn get_ws_route_count() -> u64 {
+    WS_ROUTES.len() as u64
 }

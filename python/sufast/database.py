@@ -317,7 +317,6 @@ class MigrationManager:
                 
                 # Record migration as applied
                 query = "INSERT INTO migrations (name) VALUES (?)"
-                self.db.execute_migration(query)
                 self.db.connection.execute(query, (migration.name,))
     
     def rollback(self, migration_name: str):
