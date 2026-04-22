@@ -1329,22 +1329,41 @@ class Sufast:
         loop.run_until_complete(self._run_events(self._on_startup))
         
         scheme = "https" if ssl_certfile else "http"
+
+        def _safe_console_print(message: str):
+            """Print safely on terminals that can't encode emoji/unicode."""
+            try:
+                print(message)
+            except UnicodeEncodeError:
+                out_encoding = (sys.stdout.encoding or "utf-8")
+                safe_message = message.encode(out_encoding, errors="replace").decode(
+                    out_encoding, errors="replace"
+                )
+                print(safe_message)
         
         # Print startup info
-        print(f"\n  \033[1;35m{'=' * 50}\033[0m")
-        print(f"  \033[1;36m⚡ Sufast v{self.version}\033[0m - {self.title}")
+        _safe_console_print(f"\n  \033[1;35m{'=' * 50}\033[0m")
+        _safe_console_print(f"  \033[1;36m⚡ Sufast v{self.version}\033[0m - {self.title}")
         if self._rust_available:
-            print(f"  \033[1;32m🦀 Rust core loaded\033[0m - Maximum performance mode")
+            _safe_console_print(
+                f"  \033[1;32m🦀 Rust core loaded\033[0m - Maximum performance mode"
+            )
         else:
-            print(f"  \033[1;33m🐍 Python mode\033[0m - Install Rust core for 10x speed")
+            _safe_console_print(
+                f"  \033[1;33m🐍 Python mode\033[0m - Install Rust core for 10x speed"
+            )
         if ssl_certfile:
-            print(f"  \033[1;32m🔒 TLS enabled\033[0m")
-        print(f"  \033[90mRoutes: {len(self._router.routes)} HTTP + {len(self._ws_routes)} WebSocket\033[0m")
+            _safe_console_print(f"  \033[1;32m🔒 TLS enabled\033[0m")
+        _safe_console_print(
+            f"  \033[90mRoutes: {len(self._router.routes)} HTTP + {len(self._ws_routes)} WebSocket\033[0m"
+        )
         if workers > 1:
-            print(f"  \033[90mWorkers: {workers}\033[0m")
+            _safe_console_print(f"  \033[90mWorkers: {workers}\033[0m")
         if self.docs_url:
-            print(f"  \033[90mDocs:\033[0m {scheme}://{host}:{port}{self.docs_url}")
-        print(f"  \033[1;35m{'=' * 50}\033[0m\n")
+            _safe_console_print(
+                f"  \033[90mDocs:\033[0m {scheme}://{host}:{port}{self.docs_url}"
+            )
+        _safe_console_print(f"  \033[1;35m{'=' * 50}\033[0m\n")
         
         try:
             if self._rust_available and not self.debug:
@@ -1358,23 +1377,46 @@ class Sufast:
         finally:
             loop.run_until_complete(self._run_events(self._on_shutdown))
             loop.close()
-            print("\n  \033[90mServer stopped.\033[0m\n")
+            _safe_console_print("\n  \033[90mServer stopped.\033[0m\n")
     
     def _run_rust_server(self, host: str, port: int):
         """Start the Rust-powered server."""
+        rust_state = {"result": 0, "error": None}
+        done = threading.Event()
+
+        def _run_rust_blocking():
+            try:
+                # Precompile static routes
+                self._rust_core.precompile_static_routes()
+                rust_state["result"] = self._rust_core.start_ultra_fast_server(
+                    host.encode("utf-8"), port
+                )
+            except Exception as exc:
+                rust_state["error"] = exc
+            finally:
+                done.set()
+
+        # Run Rust server in a daemon thread so Ctrl+C stays responsive.
+        rust_thread = threading.Thread(target=_run_rust_blocking, daemon=True)
+        rust_thread.start()
+
         try:
-            # Precompile static routes
-            self._rust_core.precompile_static_routes()
-            
-            result = self._rust_core.start_ultra_fast_server(
-                host.encode('utf-8'), port
+            while not done.is_set():
+                time.sleep(0.2)
+        except KeyboardInterrupt:
+            return
+
+        if rust_state["error"] is not None:
+            print(
+                f"  \033[33mRust server error: {rust_state['error']}, falling back to Python\033[0m"
             )
-            
-            if result != 0:
-                print(f"  \033[33mRust server failed (code {result}), falling back to Python\033[0m")
-                self._run_python_server(host, port)
-        except Exception as e:
-            print(f"  \033[33mRust server error: {e}, falling back to Python\033[0m")
+            self._run_python_server(host, port)
+            return
+
+        if rust_state["result"] != 0:
+            print(
+                f"  \033[33mRust server failed (code {rust_state['result']}), falling back to Python\033[0m"
+            )
             self._run_python_server(host, port)
     
     def _run_python_server(self, host: str, port: int, ssl_certfile: str = None,

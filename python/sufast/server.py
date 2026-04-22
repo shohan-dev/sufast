@@ -4,6 +4,7 @@ Used when Rust core is not available. Supports HTTP/1.1, WebSocket, SSE, TLS.
 """
 
 import asyncio
+import contextlib
 import json
 import ssl
 import time
@@ -19,6 +20,18 @@ from datetime import datetime, timezone
 
 from .exceptions import HTTPException, STATUS_PHRASES
 from .websocket import WebSocket, WebSocketState
+
+
+def _safe_console_print(message: str) -> None:
+    """Print safely on terminals that cannot encode unicode/emoji."""
+    try:
+        print(message)
+    except UnicodeEncodeError:
+        out_encoding = sys.stdout.encoding or "utf-8"
+        safe_message = message.encode(out_encoding, errors="replace").decode(
+            out_encoding, errors="replace"
+        )
+        print(safe_message)
 
 
 class HTTPServer:
@@ -91,13 +104,19 @@ class HTTPServer:
         )
         
         addr = self._server.sockets[0].getsockname()
-        print(f"\n  \033[1;36m⚡ Sufast\033[0m running on \033[1m{scheme}://{addr[0]}:{addr[1]}\033[0m")
+        _safe_console_print(
+            f"\n  \033[1;36m⚡ Sufast\033[0m running on \033[1m{scheme}://{addr[0]}:{addr[1]}\033[0m"
+        )
         if self._ssl_context:
-            print(f"  \033[1;32m🔒 TLS enabled\033[0m")
-        print(f"  \033[90mPython asyncio server (install Rust core for 10x speed)\033[0m")
+            _safe_console_print(f"  \033[1;32m🔒 TLS enabled\033[0m")
+        _safe_console_print(
+            f"  \033[90mPython asyncio server (install Rust core for 10x speed)\033[0m"
+        )
         if self.app and self.app.docs_url:
-            print(f"  \033[90m📖 Docs:\033[0m \033[4m{scheme}://{addr[0]}:{addr[1]}{self.app.docs_url}\033[0m")
-        print(f"  \033[90mPress Ctrl+C to stop\033[0m\n")
+            _safe_console_print(
+                f"  \033[90m📖 Docs:\033[0m \033[4m{scheme}://{addr[0]}:{addr[1]}{self.app.docs_url}\033[0m"
+            )
+        _safe_console_print(f"  \033[90mPress Ctrl+C to stop\033[0m\n")
         
         async with self._server:
             await self._server.serve_forever()
@@ -517,10 +536,21 @@ def _run_single(app, host, port, ssl_certfile=None, ssl_keyfile=None):
     
     # Setup signal handlers for graceful shutdown
     shutdown_event = asyncio.Event()
+    shutdown_requested = False
     
     def signal_handler():
-        print("\n\033[90m  Graceful shutdown initiated...\033[0m")
-        shutdown_event.set()
+        nonlocal shutdown_requested
+        if shutdown_requested:
+            return
+        shutdown_requested = True
+        _safe_console_print("\n\033[90m  Graceful shutdown initiated...\033[0m")
+        try:
+            if loop.is_running():
+                loop.call_soon_threadsafe(shutdown_event.set)
+            else:
+                shutdown_event.set()
+        except RuntimeError:
+            pass
     
     try:
         # Use signal handlers if on main thread
@@ -533,18 +563,29 @@ def _run_single(app, host, port, ssl_certfile=None, ssl_keyfile=None):
     except Exception:
         pass
     
+    async def _serve_until_shutdown():
+        server_task = asyncio.create_task(server.start())
+        try:
+            await shutdown_event.wait()
+        finally:
+            await server.stop()
+            if not server_task.done():
+                server_task.cancel()
+            with contextlib.suppress(asyncio.CancelledError):
+                await server_task
+
     try:
-        loop.run_until_complete(server.start())
+        loop.run_until_complete(_serve_until_shutdown())
     except KeyboardInterrupt:
-        print("\n\033[90m  Shutting down...\033[0m")
-    finally:
+        signal_handler()
         loop.run_until_complete(server.stop())
+    finally:
         loop.close()
 
 
 def _run_multiprocess(app, host, port, ssl_certfile, ssl_keyfile, workers):
     """Run server with multiple worker processes."""
-    print(f"\n  \033[1;36m⚡ Sufast\033[0m starting {workers} workers...")
+    _safe_console_print(f"\n  \033[1;36m⚡ Sufast\033[0m starting {workers} workers...")
     
     processes = []
     

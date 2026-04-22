@@ -1,108 +1,70 @@
-"""
-Unit tests for Sufast core functionality.
-"""
-import json
-import pytest
-from unittest.mock import Mock, patch, MagicMock
-import platform
-import sys
-from pathlib import Path
+"""Unit tests for core app behavior via public API."""
 
 from sufast import App
+from sufast.testclient import TestClient
 
 
-class TestApp:
-    """Test the main App class functionality."""
+def test_app_initialization_defaults():
+    app = App(title="Core Test App")
+    stats = app.get_performance_stats()
 
-    def test_app_initialization(self):
-        """Test App initializes correctly."""
-        app = App()
-        
-        assert app.routes == {
-            "GET": {},
-            "POST": {},
-            "PUT": {},
-            "PATCH": {},
-            "DELETE": {}
-        }
-        
-        expected_lib = "sufast_server.dll" if platform.system() == "Windows" else "sufast_server.so"
-        assert app.library_name == expected_lib
+    # Built-in docs + health routes should be available.
+    assert stats["routes"]["total"] >= 4
+    assert stats["framework"] == "Sufast"
 
-    def test_get_decorator(self):
-        """Test @app.get decorator registration."""
-        app = App()
-        
-        @app.get("/test")
-        def test_handler():
-            return {"message": "test"}
-        
-        assert "/test" in app.routes["GET"]
-        assert app.routes["GET"]["/test"] == '{"message": "test"}'
 
-    def test_post_decorator(self):
-        """Test @app.post decorator registration."""
-        app = App()
-        
-        @app.post("/create")
-        def create_handler():
-            return {"created": True}
-        
-        assert "/create" in app.routes["POST"]
-        assert app.routes["POST"]["/create"] == '{"created": true}'
+def test_http_method_decorators_register_and_respond():
+    app = App()
 
-    def test_put_decorator(self):
-        """Test @app.put decorator registration."""
-        app = App()
-        
-        @app.put("/update")
-        def update_handler():
-            return {"updated": True}
-        
-        assert "/update" in app.routes["PUT"]
-        assert app.routes["PUT"]["/update"] == '{"updated": true}'
+    @app.get("/get")
+    def get_handler():
+        return {"ok": "get"}
 
-    def test_patch_decorator(self):
-        """Test @app.patch decorator registration."""
-        app = App()
-        
-        @app.patch("/modify")
-        def modify_handler():
-            return {"modified": True}
-        
-        assert "/modify" in app.routes["PATCH"]
-        assert app.routes["PATCH"]["/modify"] == '{"modified": true}'
+    @app.post("/post")
+    def post_handler():
+        return {"ok": "post"}
 
-    def test_delete_decorator(self):
-        """Test @app.delete decorator registration."""
-        app = App()
-        
-        @app.delete("/remove")
-        def remove_handler():
-            return {"deleted": True}
-        
-        assert "/remove" in app.routes["DELETE"]
-        assert app.routes["DELETE"]["/remove"] == '{"deleted": true}'
+    @app.put("/put")
+    def put_handler():
+        return {"ok": "put"}
 
-    def test_string_response_handling(self):
-        """Test that string responses are not double-encoded."""
-        app = App()
-        
-        @app.get("/string")
-        def string_handler():
-            return "Hello World"
-        
-        assert app.routes["GET"]["/string"] == "Hello World"
+    @app.patch("/patch")
+    def patch_handler():
+        return {"ok": "patch"}
 
-    def test_handler_exception_handling(self):
-        """Test that handler exceptions are caught and stored."""
-        app = App()
-        
-        @app.get("/error")
-        def error_handler():
-            raise ValueError("Test error")
-        
-        stored_response = app.routes["GET"]["/error"]
-        parsed_response = json.loads(stored_response)
-        assert "error" in parsed_response
-        assert "Test error" in parsed_response["error"]
+    @app.delete("/delete")
+    def delete_handler():
+        return {"ok": "delete"}
+
+    with TestClient(app) as client:
+        assert client.get("/get").json()["ok"] == "get"
+        assert client.post("/post").json()["ok"] == "post"
+        assert client.put("/put").json()["ok"] == "put"
+        assert client.patch("/patch").json()["ok"] == "patch"
+        assert client.delete("/delete").json()["ok"] == "delete"
+
+
+def test_string_response_is_plain_text():
+    app = App()
+
+    @app.get("/string")
+    def string_handler():
+        return "Hello World"
+
+    with TestClient(app) as client:
+        response = client.get("/string")
+        assert response.status_code == 200
+        assert response.text == "Hello World"
+
+
+def test_handler_exception_returns_500():
+    app = App(debug=False)
+
+    @app.get("/error")
+    def error_handler():
+        raise ValueError("Test error")
+
+    with TestClient(app) as client:
+        response = client.get("/error")
+        assert response.status_code == 500
+        assert "Internal Server Error" in response.text

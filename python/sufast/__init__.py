@@ -34,9 +34,13 @@ from .app import Sufast, APIRouter, create_app
 
 # Request / Response
 from .request import (
-    Request, Response,
-    json_response, html_response, text_response,
-    redirect_response, file_response,
+    Request,
+    Response,
+    json_response,
+    html_response,
+    text_response,
+    redirect_response,
+    file_response,
 )
 
 # Exceptions
@@ -100,7 +104,7 @@ from .uploads import UploadFile, FormData, parse_multipart
 from .sse import SSEEvent, SSEResponse, EventSource
 
 # Database
-from .database import DatabaseConnection
+from .database import DatabaseConnection, Database, Model, SQLiteConnection
 
 # Socket.IO
 from .socketio_support import SocketIOManager
@@ -108,9 +112,13 @@ from .socketio_support import SocketIOManager
 # Test client
 from .testclient import TestClient
 
+# Backward-compatible alias for older integrations.
+App = Sufast
+
 __all__ = [
     # Framework
     "Sufast",
+    "App",
     "APIRouter",
     "create_app",
     # Request / Response
@@ -169,6 +177,9 @@ __all__ = [
     "EventSource",
     # Database
     "DatabaseConnection",
+    "Database",
+    "Model",
+    "SQLiteConnection",
     # Socket.IO
     "SocketIOManager",
     # Test
