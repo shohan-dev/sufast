@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="__DEFAULT_THEME__">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>__TITLE__ - API Docs</title>
+  <style>
+__INLINE_CSS__
+  </style>
+</head>
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand-row">
+      <div class="brand">__TITLE__</div>
+      <span class="version">v__VERSION__</span>
+    </div>
+    <p class="sidebar-subtitle">Fast API explorer</p>
+
+    <div class="controls">
+      <button id="themeToggle" class="btn ghost" type="button" title="Toggle theme">Dark</button>
+      <button id="favoritesOnly" class="btn ghost" type="button" title="Show only favorites">Favorites</button>
+      <button id="mobileClose" class="btn ghost mobile-only" type="button" title="Close navigation">Close</button>
+    </div>
+
+    <div class="search-wrap">
+      <input id="searchInput" class="input" placeholder="Search endpoints, tags, summaries..." />
+      <span class="kbd-hint">Ctrl/Cmd + K</span>
+    </div>
+
+    <div class="method-filters" id="methodFilters">
+      <button class="chip active" data-method="all">ALL</button>
+      <button class="chip" data-method="get">GET</button>
+      <button class="chip" data-method="post">POST</button>
+      <button class="chip" data-method="put">PUT</button>
+      <button class="chip" data-method="patch">PATCH</button>
+      <button class="chip" data-method="delete">DELETE</button>
+      <button class="chip" data-method="ws">WS</button>
+    </div>
+    <div class="quick-nav">
+      <div class="quick-nav-title">Favorites & Recent</div>
+      <div id="quickPins" class="quick-pins"></div>
+    </div>
+
+    <nav id="navList" class="nav-list" aria-label="Endpoint navigation"></nav>
+    <div class="sidebar-footer">Tip: use ↑/↓ and Enter in nav</div>
+  </aside>
+
+  <div class="mobile-nav-bar">
+    <button id="mobileOpen" class="btn ghost" type="button">Menu</button>
+    <button id="mobileTheme" class="btn ghost" type="button">Theme</button>
+  </div>
+
+  <main class="main" id="main">
+    <header class="hero">
+      <div class="hero-top">
+        <h1>__TITLE__</h1>
+        <div class="hero-actions">
+          <button id="expandAll" class="btn ghost" type="button">Expand All</button>
+          <button id="collapseAll" class="btn ghost" type="button">Collapse All</button>
+          <button id="clearFilters" class="btn ghost" type="button">Reset Filters</button>
+          <button id="clearFilters" class="btn ghost" type="button">Reset Filters</button>
+        </div>
+      </div>
+      </div>
+      <p class="hero-description">__DESCRIPTION__</p>
+      <div class="stats">__METHOD_STATS__</div>
+    </header>
+
+    <section class="workspace-head">
+      <div class="workspace-title">Endpoints</div>
+      <div id="resultsMeta" class="results-meta"></div>
+    </section>
+
+    <section id="groups" class="groups" aria-live="polite"></section>
+    <section id="loadingState" class="state-card" hidden>Loading endpoints...</section>
+    <section id="emptyState" class="state-card" hidden>
+      <strong>No endpoints match your filters.</strong>
+      <span>Try clearing search, method filter, or Favorites mode.</span>
+    </section>
+    <section id="errorState" class="state-card error" hidden>
+      <strong>Docs UI encountered an error.</strong>
+      <span id="errorText">Unknown rendering error.</span>
+    </section>
+
+    <footer class="footer-hints">
+      <span>Deep links and filters are URL-persisted.</span>
+      <span>Press <code>Esc</code> to clear search focus.</span>
+    </footer>
+  </main>
+
+  <div id="overlay" class="overlay"></div>
+
+  <script>
+    window.__SUFAST_SPEC__ = __SPEC_JSON__;
+    window.__SUFAST_DEFAULT_THEME__ = "__DEFAULT_THEME__";
+  </script>
+  <script>
+__INLINE_JS__
+  </script>
+</body>
+</html>

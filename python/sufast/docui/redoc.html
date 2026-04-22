@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>__TITLE__ - ReDoc</title>
+  <style>
+__INLINE_CSS__
+  </style>
+</head>
+<body>
+  <header class="topbar glass">
+    <div class="brand">__TITLE__ <span>ReDoc</span></div>
+    <div class="tools">
+      <input id="q" placeholder="Search quick links..." />
+      <select id="methodFilter">
+        <option value="all">ALL</option>
+        <option value="get">GET</option>
+        <option value="post">POST</option>
+        <option value="put">PUT</option>
+        <option value="patch">PATCH</option>
+        <option value="delete">DELETE</option>
+      </select>
+      <button id="copyPageLink" type="button">Copy Link</button>
+      <button id="themeToggle" type="button">Dark</button>
+    </div>
+  </header>
+  <section class="quick-tools glass">
+    <div class="quick-tools-title">Quick operation links</div>
+    <div id="quickLinks" class="quick-links"></div>
+    <p class="quick-note">Click to copy deep links with current filters.</p>
+  </section>
+  <div id="redoc-container"></div>
+  <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"></script>
+  <script>
+    window.__SUFAST_SPEC__ = __SPEC_JSON__;
+  </script>
+  <script>
+__INLINE_JS__
+  </script>
+</body>
+</html>

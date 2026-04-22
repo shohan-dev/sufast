@@ -7,7 +7,10 @@ app = App(debug=True)
 # Sample data
 users = {
     "1": {"name": "Alice", "email": "alice@example.com"},
-    "2": {"name": "Bob", "email": "bob@example.com"}
+    "2": {"name": "Bob", "email": "bob@example.com"},
+    "3": {"name": "Charlie", "email": "charlie@example.com"},
+    "4": {"name": "Diana", "email": "diana@example.com"},
+    "5": {"name": "Eve", "email": "eve@example.com"}
 }
 
 @app.get("/")

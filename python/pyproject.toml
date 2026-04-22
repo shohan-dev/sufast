@@ -75,7 +75,7 @@ packages = ["sufast"]
 include-package-data = true
 
 [tool.setuptools.package-data]
-sufast = ["*.dll", "*.so", "*.dylib"]
+sufast = ["*.dll", "*.so", "*.dylib", "docui/*.html", "docui/*.css", "docui/*.js"]
 
 [tool.black]
 line-length = 88
